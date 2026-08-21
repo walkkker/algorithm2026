@@ -1,0 +1,22 @@
+#### 货币面值系列问题（各有侧重点，循序渐进， 状态压缩类型题）
+- [CoinsWayEveryPaperDifferent](src/main/java/dp/coinsSeries/CoinsWayEveryPaperDifferent.java):
+    - 求方法数
+    - 数组中包含重复元素，认为相同值的元素都是不相同的。
+    - 背包问题
+- [CoinsWayNoLimit](src/main/java/dp/coinsSeries/CoinsWayNoLimit.java):
+    - https://leetcode-cn.com/problems/coin-change-2/
+    - 求方法数
+    - 数组中面值不同，每种面值都认为有无穷张，相同面值看做相同元素
+    - 特别注意，状态压缩之后，有可能，随着位置依赖的改变， dp表的更新方向也会发生改变。不然会出错！！！
+    - 单纯空间压缩时，不需要改变 for 循环顺序
+- [CoinsWaySameValueSamePaper](src/main/java/dp/coinsSeries/CoinsWaySameValueSamePapper.java):
+    - 求方法数
+    - 数组中有重复值，重复值认为是相同的纸币
+    - 综合前两问的最后进阶一问
+    - **【错误，中上】** 很多错误点，全部代码中函数waysDpPro标注，集中在 进行 状态压缩+斜率优化上面，注意复习重做
+
+- [MinCoinsNoLimit](src/main/java/dp/coinsSeries/MinCoinsNoLimit.java): 最少的硬币个数
+    - https://leetcode-cn.com/problems/coin-change/
+    - 【错误点】 1. 题目要求 无效返回-1，我却 直接将 自己设置的无效值返回，没有进行判断
+    - 【2】很重要的一点：**在从递归 改成 状态压缩，空间压缩的过程中。 注意 如果递归中出现无效值的判断，那么 改之后的dp 不仅要对 下标边界进行判断，还要对 递归中对无效值的判断 进行判断，千万不要漏掉！！**
+    - **【3】此外，一定要注意有效无效的判断: 在 base case中的 无效值，要与 正常情况下 也会产生的 默认值 （设为无效值），两者无效值要相同。 这样才能对每一个位置 做出准确的是否有效无效的判断。 建议都设为 MAX_VALUE， 或者 MIN_VALUE；详情见 LC上的错误提交**
