@@ -51,8 +51,10 @@ public class MergeKSortedArrays {
     }
 
     /**
-     * 堆节点必须同时保存元素值及其来源位置。
-     * 弹出节点后，通过 {@code rowIndex} 和 {@code index} 才能找到同一行的后继元素。
+     * 当前实现为了让比较器直接读取而同时保存元素值和来源位置。
+     * 真正不可缺少的是来源位置：弹出节点后，必须通过 {@code rowIndex} 和 {@code index}
+     * 找到同一行的后继元素。如果比较器可以持续访问原矩阵，value也可以不保存，直接使用
+     * {@code arrays[rowIndex][index]}取得。
      */
     public static class Node {
         // 当前参与K路比较的元素值。
