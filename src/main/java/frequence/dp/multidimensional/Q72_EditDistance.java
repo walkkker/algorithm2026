@@ -17,6 +17,15 @@ package frequence.dp.multidimensional;
  * <p><b>转移：</b>末尾字符相同时无需操作，读取左上角。末尾字符不同时，分别枚举替换、删除、
  * 插入三种最后一步，取最小值。不能根据两个完整字符串的长度关系提前决定操作类型。
  *
+ * <p><b>为什么末尾相同时可以直接读取左上角：</b>设A是word1前i-1个字符，B是word2前j-1
+ * 个字符，c是两个前缀相同的末尾字符。保留这个已经匹配的c，可以用
+ * {@code dp[i-1][j-1]}次操作完成{@code A+c -> B+c}，因此它首先是一个可行上界。
+ * 插入、删除分支也不可能更小。例如先以{@code dp[i-1][j]}次完成{@code A -> B+c}，
+ * 再删除c，就构造出一条成本为{@code dp[i-1][j]+1}的{@code A -> B}方案。由于
+ * {@code dp[i-1][j-1]}是{@code A -> B}的最少操作数，所以必有
+ * {@code dp[i-1][j-1] <= dp[i-1][j]+1}；插入分支同理，替换分支则明确多一次操作。
+ * 因此相同末尾免费匹配一定不劣于其他三个候选，不需要再次取最小值。
+ *
  * <p>时间复杂度O(MN)，额外空间O(MN)。详细分类参见同目录《多维DP核心总结.md》的
  * “双序列前缀模型”。
  */
@@ -56,6 +65,42 @@ public class Q72_EditDistance {
                 }
             }
             return dp[m][n];
+        }
+    }
+
+    /**
+     * 当前独立实现。先统一计算替换、插入、删除三个候选，再处理末尾字符相同的免费匹配分支。
+     * 这种写法结果正确；相同分支直接赋值左上角，是因为左上角已经被证明不大于其余候选。
+     */
+    public static class CurrentSolution {
+
+        public int minDistance(String word1, String word2) {
+            char[] chs1 = word1.toCharArray();
+            char[] chs2 = word2.toCharArray();
+            int[][] dp = new int[chs1.length + 1][chs2.length + 1];
+
+            for (int j = 0; j <= chs2.length; j++) {
+                dp[0][j] = j;
+            }
+
+            for (int i = 1; i <= chs1.length; i++) {
+                dp[i][0] = i;
+                for (int j = 1; j <= chs2.length; j++) {
+                    int replace = dp[i - 1][j - 1] + 1;
+                    int insert = dp[i][j - 1] + 1;
+                    int delete = dp[i - 1][j] + 1;
+                    int ans = Math.min(replace, Math.min(insert, delete));
+
+                    if (chs1[i - 1] == chs2[j - 1]) {
+                        // 疑问澄清：写成Math.min(ans, dp[i - 1][j - 1])也正确，但比较是冗余的。
+                        // 相同结尾可以免费匹配；左上角一定不大于插入、删除、替换三个候选。
+                        // ans = Math.min(ans, dp[i - 1][j - 1]);
+                        ans = dp[i - 1][j - 1];
+                    }
+                    dp[i][j] = ans;
+                }
+            }
+            return dp[chs1.length][chs2.length];
         }
     }
 

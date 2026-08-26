@@ -169,6 +169,7 @@ public class MultidimensionalDpDifferentialTest {
 
     private static void testQ72() {
         Q72_EditDistance.OriginalSolution original = new Q72_EditDistance.OriginalSolution();
+        Q72_EditDistance.CurrentSolution current = new Q72_EditDistance.CurrentSolution();
         Q72_EditDistance.RecommendedSolution recommended
                 = new Q72_EditDistance.RecommendedSolution();
         Random random = new Random(RANDOM_SEED);
@@ -180,6 +181,7 @@ public class MultidimensionalDpDifferentialTest {
             int expected = editDistanceBrute(source.toCharArray(), target.toCharArray(),
                     0, 0, new HashMap<String, Integer>());
             assertEquals(expected, original.minDistance(source, target), "Q72 original");
+            assertEquals(expected, current.minDistance(source, target), "Q72 current");
             assertEquals(expected, recommended.minDistance(source, target),
                     "Q72 recommended");
         }
