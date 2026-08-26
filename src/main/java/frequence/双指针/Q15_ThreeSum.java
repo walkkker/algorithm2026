@@ -174,6 +174,70 @@ public class Q15_ThreeSum {
         }
     }
 
+    /**
+     * 2026-08-27 我的正确修改版。
+     *
+     * <p>本题是求三数之和为0，可以作为“排序 + 固定一个数 + 双指针”模板。
+     * 这道题的难点不在双指针本身，而在去重时机和指针移动规则。
+     *
+     * <p><b>本次错误：</b>在尚未根据当前sum判断应该移动哪个指针时，
+     * 就同时跳过L、R两侧的重复值。这可能提前丢掉后续答案需要的下标，
+     * 反例是{@code [1,2,0,1,0,0,0,0]}排序后应收集{@code [0,0,0]}。
+     *
+     * <p><b>修正步骤：</b>
+     * <ol>
+     *     <li>sum小于0：只执行{@code L++}。</li>
+     *     <li>sum大于0：只执行{@code R--}。</li>
+     *     <li>sum等于0：先收集答案，再跳过L、R当前值的重复区间，最后各移动一步。</li>
+     * </ol>
+     *
+     * <p>真正必须显式去重的是“收集结果之后”，否则相同的左右值会重复收集同一个三元组。
+     * 当sum不等于0时不必显式跳过重复值：单指针逐步移动仍然正确，只是可能多执行几次比较。
+     */
+    public static class MyCorrectedSolution20260827 {
+
+        public List<List<Integer>> threeSum(int[] nums) {
+            Arrays.sort(nums);
+            List<List<Integer>> ans = new ArrayList<>();
+
+            for (int i = 0; i < nums.length - 2; i++) {
+                // 固定值去重：保留第一个相同值，后续相同值不再重复枚举。
+                if (i >= 1 && nums[i] == nums[i - 1]) {
+                    continue;
+                }
+
+                int left = i + 1;
+                int right = nums.length - 1;
+                while (left < right) {
+                    // 缓存本轮候选三元组的sum：后面的指针移动不得改变本轮分类依据。
+                    // 题目当前取值范围下int不会溢出；作为通用模板可改成long sum。
+                    int sum = nums[i] + nums[left] + nums[right];
+
+                    if (sum < 0) {
+                        left++;
+                    } else if (sum > 0) {
+                        right--;
+                    } else {
+                        // TODO: 【2026-08-27 遗忘点】找到答案时必须先收集，不能只移动去重指针。
+                        ans.add(Arrays.asList(nums[i], nums[left], nums[right]));
+
+                        // 跳过与当前left、right相同的值，避免重复收集同一个三元组。
+                        while (left < right && nums[left + 1] == nums[left]) {
+                            left++;
+                        }
+                        while (left < right && nums[right - 1] == nums[right]) {
+                            right--;
+                        }
+
+                        left++;
+                        right--;
+                    }
+                }
+            }
+            return ans;
+        }
+    }
+
 
 
     // ai 答案
