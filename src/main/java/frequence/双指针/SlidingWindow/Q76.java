@@ -6,7 +6,7 @@ package frequence.双指针.SlidingWindow;
  * 再对所有右端点的结果取最小值，就得到全局最短窗口。
  *
  * <p><b>专题分类：</b>连续子串+可变长度滑动窗口，不属于DP。专题索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q76 {
     // My version TODO：一定要看错误点。 一个是最后【绝对不能忘记】检查ans=Integer.MAX_VALUE，进而返回无效答案；-> 【最终返回什么取决于题目对“不存在答案”的约定】

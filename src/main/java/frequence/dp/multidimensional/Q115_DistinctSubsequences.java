@@ -20,7 +20,7 @@ package frequence.dp.multidimensional;
  * {@code dp[i][0] = 1}；空s不能组成非空t，故{@code dp[0][j] = 0}。
  *
  * <p>详细分类参见上级目录《动态规划题型共性总结.md》以及专题
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q115_DistinctSubsequences {
 

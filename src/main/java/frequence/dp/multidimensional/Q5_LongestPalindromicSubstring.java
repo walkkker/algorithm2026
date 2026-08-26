@@ -13,7 +13,7 @@ package frequence.dp.multidimensional;
  * O(N)，比区间DP的O(N^2)更优。为了保留你的实现并说明本章节模型，文件同时提供两种方法。
  *
  * <p>详细分类参见同目录《多维DP核心总结.md》的“单序列区间模型”，以及专题
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q5_LongestPalindromicSubstring {
 

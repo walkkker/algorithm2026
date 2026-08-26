@@ -5,7 +5,7 @@ import java.util.*;
  * 给定一个字符串 s ，请你找出其中不含有重复字符的 最长 子串 的长度。
  *
  * <p><b>专题分类：</b>连续子串+可变长度滑动窗口，不属于DP。专题索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  *
  * TODO：【注意】本题s的元素范围是 s 由英文字母、数字、符号和空格组成。
  *

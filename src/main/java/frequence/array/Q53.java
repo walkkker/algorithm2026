@@ -7,7 +7,7 @@ package frequence.array;
  *
  * <p><b>专题分类：</b>连续子数组。可使用前缀和减左侧最小前缀，也可定义“必须以i结尾”的
  * 最大值DP（Kadane）。对照索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q53 {
     // O(N) 空间:O(N) 不是最优解

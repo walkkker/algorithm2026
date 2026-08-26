@@ -12,7 +12,7 @@ package frequence.substringandsubsequence;
  * “求最长、求最少、统计所有方案”等需要保存重叠子问题答案的目标。指针sourceIndex只在匹配成功
  * 时前进，targetIndex始终向右扫描，最终检查s是否全部匹配。
  *
- * <p>时间复杂度O(|T|)，额外空间O(1)。相关模型参见同目录《子串与子序列专题.md》。
+ * <p>时间复杂度O(|T|)，额外空间O(1)。相关模型参见同目录《子串与子序列区别.md》。
  */
 public class Q392_IsSubsequence {
 

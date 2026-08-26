@@ -9,7 +9,7 @@ import java.util.*;
  * 分割方案。
  *
  * <p><b>专题分类：</b>回溯枚举字符串切分点，使用回文子串判断作为分支合法性条件；可用区间DP
- * 预处理回文性。专题索引参见{@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * 预处理回文性。专题索引参见{@code frequence/substringandsubsequence/子串与子序列区别.md}。
  *
  * <p><b>当前版本的递归树：</b>{@code index}表示下一段子串的起始位置；当前层枚举
  * {@code end = index..s.length()-1}，每个回文区间{@code [index, end]}都是当前层的一种

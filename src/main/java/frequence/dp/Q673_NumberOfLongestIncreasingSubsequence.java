@@ -21,7 +21,7 @@ package frequence.dp;
  * 的{@code count[i]}，因为全局LIS不一定以最后一个数组元素结尾。
  *
  * <p>详细分类参见同目录《动态规划题型共性总结.md》《一维位置结尾型DP.md》，以及专题
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q673_NumberOfLongestIncreasingSubsequence {
 

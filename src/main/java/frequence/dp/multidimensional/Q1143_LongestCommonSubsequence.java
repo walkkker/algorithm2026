@@ -17,7 +17,7 @@ package frequence.dp.multidimensional;
  *
  * <p>时间复杂度O(MN)，二维版本额外空间O(MN)。详细分类参见同目录
  * 《多维DP核心总结.md》的“双序列前缀模型”，以及专题
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q1143_LongestCommonSubsequence {
 

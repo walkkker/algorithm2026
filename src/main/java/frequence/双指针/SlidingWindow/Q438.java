@@ -8,7 +8,7 @@ import java.util.*;
  * Note: s 和 p 仅包含小写字母
  *
  * <p><b>专题分类：</b>连续子串+固定长度滑动窗口，不属于DP。专题索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  *
  *
  * （1）Anagrams1 不是最优解。 问题出在isMatch的比较上

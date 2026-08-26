@@ -27,7 +27,7 @@ import java.util.HashMap;
  * 这是学习一维DP时最重要的“改变状态视角”案例，详细推导参见同目录《一维DP核心总结.md》。
  *
  * <p>子序列DP与双指针、贪心方法的选择参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q300_LongestIncreasingSubsequence {
 

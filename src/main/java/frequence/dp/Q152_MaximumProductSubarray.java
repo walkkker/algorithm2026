@@ -29,7 +29,7 @@ package frequence.dp;
  * 股票状态描述互斥业务状态。详细对比参见同目录《乘积最大子数组与股票状态机DP对比.md》。
  *
  * <p>连续子数组与非连续子序列的模型对照参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q152_MaximumProductSubarray {
 

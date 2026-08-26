@@ -27,7 +27,7 @@ import java.util.*;
  * 参见同目录《一维DP核心总结.md》。
  *
  * <p>本题作为连续子串结尾型DP的专题索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q32_LongestValidParentheses {
 

@@ -29,7 +29,7 @@ import java.util.Set;
  * 同目录《一维DP核心总结.md》。
  *
  * <p>子串与子序列的连续性对照参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class Q139_WordBreak {
 

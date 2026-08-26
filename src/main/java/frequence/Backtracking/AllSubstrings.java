@@ -17,7 +17,7 @@ import java.util.Random;
  * 返回顺序不限，对数器会按照多重集合比较结果。
  *
  * <p><b>专题分类：</b>连续子串的全区间枚举。专题索引参见
- * {@code frequence/substringandsubsequence/子串与子序列专题.md}。
+ * {@code frequence/substringandsubsequence/子串与子序列区别.md}。
  */
 public class AllSubstrings {
 
