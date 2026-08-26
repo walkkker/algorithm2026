@@ -11,6 +11,16 @@ import java.util.*;
  * 难就难在思路和去重实现。
  *
  * TODO：如果寻求简单实现，那就用Set。  寻求思考缜密，那就加上去重逻辑，优化常数项。 但是一定注意，第一个相同值必须计算，后面的去重跳过。 绝对不能反过来，会漏答案。
+ *
+ * <p><b>2026-08-27 错误复盘：</b>不能在判断当前sum之前，无条件同时压缩L和R两侧的重复值。
+ * 反例{@code [0,0,0,0,1,2,3]}中，固定第一个0以后，初始sum大于0，本轮只能移动R；
+ * 错误代码却先把L从第二个0移动到最后一个0。随后R不断左移，等R到达0区间时已经没有两个不同
+ * 下标可供L、R使用，于是遗漏合法答案{@code [0,0,0]}。
+ *
+ * <p><b>修正原则：</b>先缓存当前三数之和，再由大小关系决定本轮允许移动的指针：sum小于0只移动L，
+ * sum大于0只移动R；只有sum等于0并收集答案后，L、R才都可以移动并分别跳过重复值。
+ * “重复值不会产生新的值组合”不代表可以提前移动没有被当前大小关系选中的另一侧指针，因为三数之和
+ * 仍然要求使用三个不同下标，提前跨过重复区间可能破坏后续答案所需的下标数量。
  */
 public class Q15_ThreeSum {
     /**
@@ -85,6 +95,82 @@ public class Q15_ThreeSum {
 
             return ans;
 
+        }
+    }
+
+    /**
+     * 2026-08-27 当前实现复盘：错误代码以注释形式保留，下面执行修正后的分支移动与去重逻辑。
+     */
+    public static class Solution20260827 {
+
+        public List<List<Integer>> threeSum(int[] nums) {
+            Arrays.sort(nums);
+            List<List<Integer>> ans = new ArrayList<>();
+
+            for (int i = 0; i < nums.length - 2; i++) {
+                // 固定位置i去重：保留相同值第一次出现的位置，后续相同固定值直接跳过。
+                if (i > 0 && nums[i] == nums[i - 1]) {
+                    continue;
+                }
+
+                if (nums[i] > 0) {
+                    break;
+                }
+
+                int left = i + 1;
+                int right = nums.length - 1;
+
+                while (left < right) {
+                    long sum = (long) nums[i] + nums[left] + nums[right];
+
+                    // TODO: 【2026-08-27 致命错误】不能在判断sum之前，无条件同时压缩左右重复区间。
+                    // 错误原因：sum > 0时本轮只能移动right，但下面的错误代码会先移动left。
+                    // 在[0,0,0,0,1,2,3]中，这会把left移动到最后一个0，最终遗漏[0,0,0]。
+                    // 错误代码：
+                    // while (left + 1 < nums.length && nums[left + 1] == nums[left]) {
+                    //     left++;
+                    // }
+                    // while (right - 1 >= 0 && nums[right - 1] == nums[right]) {
+                    //     right--;
+                    // }
+
+                    if (sum < 0) {
+                        // 当前和偏小，只能通过增大左值寻找答案；right仍可能参与后续答案。
+                        left++;
+                    } else if (sum > 0) {
+                        // 当前和偏大，只能通过减小右值寻找答案；left仍可能参与后续答案。
+                        right--;
+                    } else {
+                        ans.add(Arrays.asList(nums[i], nums[left], nums[right]));
+
+                        // 找到答案后，当前左右值对应的三元组已经收集，可以同时移动两个指针。
+                        left++;
+                        right--;
+
+                        // 跳过刚才已经使用过的左值；left-1是已收集答案中的旧左值。
+                        while (left < right && nums[left] == nums[left - 1]) {
+                            left++;
+                        }
+
+                        // 跳过刚才已经使用过的右值；right+1是已收集答案中的旧右值。
+                        while (left < right && nums[right] == nums[right + 1]) {
+                            right--;
+                        }
+                    }
+
+                    // TODO: 【2026-08-27 旧写法错误】不要用两个会重新计算表达式的独立if。
+                    // 第一个if修改left后，第二个if判断的已经不是同一个候选三元组。
+                    // 错误代码：
+                    // if (nums[left] + nums[right] <= -nums[i]) {
+                    //     left++;
+                    // }
+                    // if (nums[left] + nums[right] >= -nums[i]) {
+                    //     right--;
+                    // }
+                    // 修正：使用本轮移动前缓存的sum，并采用if / else if / else互斥分类。
+                }
+            }
+            return ans;
         }
     }
 
