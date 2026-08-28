@@ -10,6 +10,48 @@ import java.util.*;
  */
 public class Q238 {
 
+    /**
+     * 思路： 两个数组，前缀乘积数组 + 后缀乘积数组。
+     *
+     * 最终优化空间：复用ans数组保存后缀。  使用变量left存储前缀。
+     *
+     * <p><b>2026-08-29 重点：</b>这版代码与常见的“ans先保存左侧乘积”写法方向相反。
+     * 第一遍结束后，{@code ans[i]}表示包含{@code nums[i]}在内的后缀乘积
+     * {@code nums[i] * nums[i + 1] * ... * nums[n - 1]}。因此计算位置i的答案时，
+     * 必须使用{@code ans[i + 1]}，它才是严格位于i右侧的乘积。
+     *
+     * <p><b>循环不变量：</b>
+     * <ul>
+     *     <li>进入第二个循环的位置i时，{@code left}等于{@code nums[0...i-1]}的乘积，不包含当前元素。</li>
+     *     <li>{@code ans[i + 1]}等于{@code nums[i+1...n-1]}的乘积，不包含当前元素。</li>
+     *     <li>所以{@code left * ans[i + 1]}正好等于“除nums[i]以外所有元素的乘积”。</li>
+     * </ul>
+     *
+     * <p><b>易错点：</b>
+     * <ol>
+     *     <li>第二个循环只能遍历到{@code ans.length - 2}，因为代码会访问{@code ans[i + 1]}。</li>
+     *     <li>必须先计算{@code ans[i]}，再执行{@code left *= nums[i]}；反过来会错误地包含当前元素。</li>
+     *     <li>最后一个位置右侧没有元素，其右侧乘积是乘法单位元1，因此最终单独赋值为{@code left}。</li>
+     * </ol>
+     */
+    public static class Solution20260829 {
+
+        public int[] productExceptSelf(int[] nums) {
+            int left = 1;
+            int[] ans = new int[nums.length];
+            ans[ans.length - 1] = nums[nums.length - 1];
+            for (int i = nums.length - 2; i >= 0; i--) {
+                ans[i] = nums[i] * ans[i + 1];
+            }
+            for (int i = 0; i < ans.length - 1; i++) {
+                ans[i] = left * ans[i + 1];
+                left = left * nums[i];
+            }
+            ans[ans.length - 1] = left;
+            return ans;
+        }
+    }
+
     public int[] productExceptSelf(int[] nums) {
         int len = nums.length;
         int[] ans = new int[len];
