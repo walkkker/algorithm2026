@@ -62,6 +62,99 @@ package frequence.array;
  */
 public class Q41_FirstMissingPositive {
 
+    /**
+     * 2026-08-29 超级经典错误版，完整保留当时的实现和错误现场。
+     *
+     * <p><b>核心致命错误：</b>
+     * <pre>{@code
+     * swap(nums, index++, nums[index]);
+     * }</pre>
+     * Java 方法实参按照从左到右的顺序求值。执行到这行时，第二个实参
+     * {@code index++}会先返回旧值，并立即完成自增；第三个实参
+     * {@code nums[index]}随后读取的已经是自增后的index。
+     *
+     * <p>失败用例{@code [100000, 3, 4000, 2, 15, 1, 99999]}执行到错误现场时：
+     * <pre>{@code
+     * index == 5
+     * nums[5] == 1
+     *
+     * int i = index++;      // i = 5，随后index变成6
+     * int j = nums[index];  // 读取nums[6]，得到99999
+     * swap(nums, i, j);     // 实际调用swap(nums, 5, 99999)
+     * }</pre>
+     * 最终在swap内部访问{@code nums[99999]}，抛出ArrayIndexOutOfBoundsException。
+     *
+     * <p><b>最小修正：</b>
+     * <pre>{@code
+     * int targetIndex = nums[index];
+     * swap(nums, index, targetIndex);
+     * }</pre>
+     * 交换后不能执行index++，因为换到当前位置的新值仍未检查，必须让while重新处理当前index。
+     * 因此原来的大小分支也没有必要，两边都应该执行同一个“不移动index的交换”。
+     *
+     * <p>完整复盘、截图和标准原地哈希版本见：
+     * {@code frequence/超级经典必看错误/Q41_方法实参求值顺序导致数组越界.md}。
+     */
+    public static class Solution_superMistake_20260829 {
+
+        /**
+         * 标准原地哈希一般是：值v应该放到下标v - 1 。 不过我们映射比较特殊，是把 nums.length放到0的位置上了。
+         *
+         * 没有出现的最小的正整数。
+         * （O(N) + O(1)）
+         *
+         * 技巧： 关键看 寻找最小正整数 =》 利用数组下标。
+         */
+        public int firstMissingPositive(int[] nums) {
+            int index = 0;
+            while (index < nums.length) {
+                if (nums[index] < 0 || nums[index] >= nums.length || index == nums[index]) {
+                    index++;
+                } else {
+                    // 这里是难点。如果目标下标上面的值已经等于目标下标，那么当前index直接跳过。
+                    // 不然，如果目标下标是后面的，就会死循环停留在原地。
+                    if (nums[nums[index]] == nums[index]) {
+                        index++;
+                    } else {
+                        if (nums[index] > index) {
+                            swap(nums, index, nums[index]);
+                        } else {
+                            // TODO: 【2026-08-29 超级致命错误】方法实参从左到右求值。
+                            // index++先完成自增，后面的nums[index]使用的是新index，不是旧index。
+                            // 失败现场实际等价于swap(nums, 5, nums[6])，即swap(nums, 5, 99999)。
+                            // 错误行：swap(nums, index++, nums[index]);
+                            // 正确语句：int targetIndex = nums[index]; swap(nums, index, targetIndex);
+                            // 特别注意：交换后不能index++，换到当前位置的新值还需要重新检查。
+                            swap(nums, index++, nums[index]);
+                        }
+                    }
+                }
+            }
+
+            // TODO: 【错误1】返回这里是错的。如果全部都贴合，那么就返回不存在数组中的下一个正整数，
+            // 即nums.length。不存在无效值的返回结果。
+            // 错误行：return 0;
+
+            // TODO: 【错误2 - 超级错误！！！】题目要的是最小正整数。但是有可能[3,1,2]这种，
+            // 最小正整数可不是3！！！
+            // 所以，当确认missingValue后（这里特指：数组下标都满足后缺失nums.length），
+            // 要拿着缺失值去nums[0]确认一下。
+            for (int i = 1; i < nums.length; i++) {
+                if (nums[i] != i) {
+                    return i;
+                }
+            }
+            int missing = nums.length;
+            return nums[0] == missing ? missing + 1 : missing;
+        }
+
+        private void swap(int[] nums, int i, int j) {
+            int tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+    }
+
     public int firstMissingPositive(int[] nums) {
         int i = 0;
         while (i < nums.length) {
