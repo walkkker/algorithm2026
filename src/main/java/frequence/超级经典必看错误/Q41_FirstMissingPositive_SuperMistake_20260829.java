@@ -18,6 +18,12 @@ package frequence.超级经典必看错误;
  * <p>错误截图：
  * <br><img src="doc-files/Q41_ArrayIndexOutOfBounds_20260829.png" alt="Q41 ArrayIndexOutOfBoundsException">
  *
+ * <p>方法实参从左到右求值图解：
+ * <br><img src="doc-files/Q41_ArgumentEvaluation_Overview_20260829.png" alt="Java argument evaluation order">
+ *
+ * <p>{@code index++}副作用发生时机与三步展开：
+ * <br><img src="doc-files/Q41_ArgumentEvaluation_Steps_20260829.png" alt="index increment evaluation steps">
+ *
  * <p>详细数据流、最小修正和标准模板见同目录：
  * {@code Q41_方法实参求值顺序导致数组越界.md}。
  */
