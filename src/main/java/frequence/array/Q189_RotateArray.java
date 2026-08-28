@@ -111,6 +111,45 @@ package frequence.array;
  */
 public class Q189_RotateArray {
 
+    /**
+     * 技巧:关于原地O(1) 实现数组轮转的核心关键： 就是 【反转部分数组】！！！
+     *     1. 【非轮转部分】 和 【轮转部分】 单独反转
+     *     2. 总体反转！！！
+     *
+     * TODO：【错误】题目存在k > nums.length的情况，必须要 取余！！！
+     * - 1 <= nums.length <= 10^5
+     * - 0 <= k <= 10^5  => 没有说 nums.length 和 k的大小问题！！！
+     */
+    public static class Solution20260829 {
+
+        public void rotate(int[] nums, int k) {
+            // TODO： 【错误】题目存在k > nums.length的情况，必须要 取余！！！
+            k = k % nums.length;
+
+            // TODO: ai建议下面这个加上
+            if (k == 0) {
+                return;
+            }
+            reverse(nums, 0, nums.length - k - 1);
+            reverse(nums, nums.length - k, nums.length - 1);
+            reverse(nums, 0, nums.length - 1);
+        }
+
+        private void reverse(int[] nums, int s, int e) {
+            while (s <= e) {
+                swap(nums, s, e);
+                s++;
+                e--;
+            }
+        }
+
+        private void swap(int[] nums, int i, int j) {
+            int tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+    }
+
     public void rotate(int[] nums, int k) {
         // TODO: 【超级错误-超级重要】右旋次数k 可以大于 nums.length，即代表多次 向右轮转。
         //  你会发现 如果nums.length=3,向右轮转3次，那么数组原封不动。 所以有效的k = k%nums.length；
