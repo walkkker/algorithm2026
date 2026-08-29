@@ -31,6 +31,10 @@ package frequence.BinaryTree;
  *
  * <p>时间复杂度为{@code O(N)}，每个节点只处理一次；递归栈空间为{@code O(H)}，
  * 其中{@code H}是树高，二叉树退化成链表时最坏为{@code O(N)}。
+ *
+ * <p><b>专题归类：</b>底向上Info、子树答案传播优先级和目标节点包含状态。
+ * 参见同目录《二叉树通用技巧与题型分类.md》、《二叉树错题本.md》以及
+ * 《二叉树递归套路 易犯错误注意事项.md》的Q236条目。
  */
 public class Q236_LowestCommonAncestorOfABinaryTree {
 

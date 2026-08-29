@@ -10,6 +10,9 @@ package frequence.BinaryTree;
  * <p>给定一个二叉树的根节点 {@code root}，将其原地展开为一条单链表。
  * 展开后的链表使用二叉树节点的 {@code right} 指针连接下一个节点，
  * 所有节点的 {@code left} 指针必须为 {@code null}，节点顺序应与二叉树的前序遍历一致。
+ *
+ * <p><b>专题归类：</b>递归返回尾节点与原地结构改写。参见同目录
+ * 《二叉树通用技巧与题型分类.md》和《二叉树错题本.md》的Q114条目。
  */
 public class Q114_FlattenBinaryTreeToLinkedList {
 

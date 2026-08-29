@@ -48,6 +48,9 @@ import java.util.Stack;
  * <p><b>面试选择：</b>
  * 只查询一次时直接使用当前中序遍历；动态插入/删除并频繁查询排名时，使用维护size的
  * SBTSet/Order Statistic Tree。不要为了单次查询重新构建一棵SBT。
+ *
+ * <p><b>专题归类：</b>BST中序有序性与顺序统计树。参见同目录
+ * 《二叉树通用技巧与题型分类.md》以及{@code treemap/sbt}下的SBT模板文档。
  */
 public class Q230_KthSmallestElementInABST {
 

@@ -9,6 +9,9 @@ import java.util.*;
  *
  *
  * 实现递归和非递归版本
+ *
+ * <p><b>专题归类：</b>DFS访问时机、递归栈与显式栈模拟；BST相关题目的基础。
+ * 参见同目录《二叉树通用技巧与题型分类.md》和《二叉树专题总览与面试优先级.md》。
  */
 public class Q94_BinaryTreeInorderTraversal {
 

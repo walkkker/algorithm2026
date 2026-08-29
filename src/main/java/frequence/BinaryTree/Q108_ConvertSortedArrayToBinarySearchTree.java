@@ -7,6 +7,9 @@ package frequence.BinaryTree;
  *
  * <p>给定一个按照严格升序排列的整数数组 {@code nums}，将其转换为一棵高度平衡的二叉搜索树，
  * 并返回该树的根节点。高度平衡二叉树要求每个节点的左右子树高度差不超过1。
+ *
+ * <p><b>专题归类：</b>数组区间建树；选择中点作为根，使左右区间规模尽量平衡。
+ * 参见同目录《二叉树通用技巧与题型分类.md》。
  */
 public class Q108_ConvertSortedArrayToBinarySearchTree {
 

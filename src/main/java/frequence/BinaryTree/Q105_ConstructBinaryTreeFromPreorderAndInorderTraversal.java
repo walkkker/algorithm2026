@@ -11,6 +11,9 @@ import java.util.*;
  * 是二叉树的前序遍历，{@code inorder} 是同一棵树的中序遍历，请构造并返回这棵二叉树。
  *
  * <p>题目保证输入的前序遍历和中序遍历均不包含重复元素，并且二者一定对应同一棵二叉树。
+ *
+ * <p><b>专题归类：</b>数组区间递归、根位置定位和左右子树长度同步切分。
+ * 参见同目录《二叉树通用技巧与题型分类.md》和《二叉树错题本.md》的Q105条目。
  */
 public class Q105_ConstructBinaryTreeFromPreorderAndInorderTraversal {
 

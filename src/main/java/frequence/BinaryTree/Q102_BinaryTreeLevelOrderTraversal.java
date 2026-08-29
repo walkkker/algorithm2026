@@ -7,6 +7,9 @@ import java.util.*;
  *
  * <p>给定一个二叉树的根节点 {@code root}，按照从上到下、从左到右的顺序逐层访问节点，
  * 并返回每一层节点值组成的列表。
+ *
+ * <p><b>专题归类：</b>BFS、队列与层边界识别。参见同目录《二叉树通用技巧与题型分类.md》
+ * 和《二叉树错题本.md》的Q102/Q199条目。
  */
 public class Q102_BinaryTreeLevelOrderTraversal {
     public List<List<Integer>> levelOrder(TreeNode root) {

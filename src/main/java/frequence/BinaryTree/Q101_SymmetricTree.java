@@ -6,6 +6,9 @@ package frequence.BinaryTree;
  * TODO: 【错误！！！要的是轴对称呀】这道题错了！！ 轴对称呀！！！ 不是cur1.left == cur2.left，应该是cur1.left==cur2.right。 自己画张图就知道了
  *
  * <p>给定一个二叉树的根节点 {@code root}，判断该二叉树是否关于其中心轴镜像对称。
+ *
+ * <p><b>专题归类：</b>双节点递归与镜像配对。参见同目录《二叉树通用技巧与题型分类.md》
+ * 和《二叉树错题本.md》的Q101条目。
  */
 public class Q101_SymmetricTree {
 

@@ -4,6 +4,9 @@ package frequence.BinaryTree;
  * 226. 翻转二叉树
  *
  * <p>给定一个二叉树的根节点 {@code root}，，返回翻转后二叉树的根节点。
+ *
+ * <p><b>专题归类：</b>直接递归改写；覆盖{@code left/right}前必须冻结原子树入口。
+ * 参见同目录《二叉树通用技巧与题型分类.md》和《二叉树错题本.md》的Q226条目。
  */
 public class Q226_InvertBinaryTree {
 
