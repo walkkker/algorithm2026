@@ -73,6 +73,16 @@ public class Q41_FirstMissingPositive {
      * {@code index++}会先返回旧值，并立即完成自增；第三个实参
      * {@code nums[index]}随后读取的已经是自增后的index。
      *
+     * <p><b>必须同时记住的两个阶段：</b>
+     * <pre>{@code
+     * 阶段1：从左到右求值实参表达式。
+     *        如果表达式包含index++、赋值或方法调用，其副作用在求值时立即发生。
+     * 阶段2：使用阶段1得到的值初始化对应形参，然后进入方法体。
+     * }</pre>
+     * 可以把阶段2近似理解为{@code i = 5; j = 99999;}，但导致index变成6的不是
+     * “给形参赋值”，而是阶段1求值{@code index++}时发生的副作用。
+     * Java始终按值传递；数组实参传递的是数组引用值的副本。
+     *
      * <p>失败用例{@code [100000, 3, 4000, 2, 15, 1, 99999]}执行到错误现场时：
      * <pre>{@code
      * index == 5
@@ -121,6 +131,8 @@ public class Q41_FirstMissingPositive {
                         } else {
                             // TODO: 【2026-08-29 超级致命错误】方法实参从左到右求值。
                             // index++先完成自增，后面的nums[index]使用的是新index，不是旧index。
+                            // 两阶段：先求值全部实参表达式，再用求值结果初始化形参并进入方法体。
+                            // 注意：index变成6发生在“实参求值阶段”，不是“形参赋值阶段”。
                             // 失败现场实际等价于swap(nums, 5, nums[6])，即swap(nums, 5, 99999)。
                             // 错误行：swap(nums, index++, nums[index]);
                             // 正确语句：int targetIndex = nums[index]; swap(nums, index, targetIndex);

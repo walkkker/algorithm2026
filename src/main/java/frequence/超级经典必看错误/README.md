@@ -15,4 +15,4 @@
 
 | 日期 | 题目 | 核心错误 | 详细复盘 | 代码 |
 | --- | --- | --- | --- | --- |
-| 2026-08-29 | LeetCode 41 缺失的第一个正数 | `swap(nums, index++, nums[index])` 中的方法实参求值顺序 | [Q41 方法实参求值顺序导致数组越界](./Q41_方法实参求值顺序导致数组越界.md) | [Q41_FirstMissingPositive_SuperMistake_20260829.java](./Q41_FirstMissingPositive_SuperMistake_20260829.java) |
+| 2026-08-29 | LeetCode 41 缺失的第一个正数 | 实参表达式含自增副作用；Java从左到右求值实参，随后才初始化形参 | [Q41 方法实参求值顺序导致数组越界](./Q41_方法实参求值顺序导致数组越界.md) | [Q41_FirstMissingPositive_SuperMistake_20260829.java](./Q41_FirstMissingPositive_SuperMistake_20260829.java) |

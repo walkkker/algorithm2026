@@ -12,6 +12,15 @@ package frequence.超级经典必看错误;
  * <p>Java从左到右计算实参。{@code index++}作为表达式的值是旧index，
  * 但在计算后续{@code nums[index]}之前，index本身已经完成加一。
  *
+ * <p><b>重复强调两个独立阶段：</b>
+ * <pre>{@code
+ * 1. 实参求值：从左到右计算nums、index++、nums[index]，副作用立即生效。
+ * 2. 形参初始化：将求值结果按位置交给nums、i、j三个形参，然后执行swap方法体。
+ * }</pre>
+ * 方法调用确实可以近似理解为“把实参计算结果赋给形参”，但必须先完成实参表达式求值。
+ * {@code index++}导致index变化发生在第一阶段，不是第二阶段。Java始终按值传递；
+ * 对数组而言，传递的是数组引用值的副本。
+ *
  * <p>失败用例：{@code [100000, 3, 4000, 2, 15, 1, 99999]}。
  * 错误现场实际调用为{@code swap(nums, 5, 99999)}。
  *
@@ -60,7 +69,9 @@ public class Q41_FirstMissingPositive_SuperMistake_20260829 {
                             // TODO: 【核心错误】Java从左到右计算方法实参。
                             // 1. index++向第二个实参提供旧值，但index立即加一。
                             // 2. nums[index]作为第三个实参，读取的是加一后的index。
-                            // 3. 失败现场实际变成swap(nums, 5, 99999)。
+                            // 3. 所有实参求值完成后，结果才分别初始化形参nums、i、j。
+                            // 4. 失败现场实际变成swap(nums, 5, 99999)。
+                            // 注意：index变化发生在实参求值阶段，不是形参初始化阶段。
                             // 错误行：
                             swap(nums, index++, nums[index]);
                             // 正确语句：int targetIndex = nums[index]; swap(nums, index, targetIndex);
