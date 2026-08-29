@@ -5,6 +5,9 @@ package frequence.LinkedList;
  *
  * <p>给定一个链表的头结点 {@code head} 和一个整数 {@code n}，删除链表的倒数第
  * {@code n} 个结点，并返回删除后的链表头结点。
+ *
+ * <p><b>专题归类：</b>倒数位置、固定距离双指针、前驱删除与dummy统一边界。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》和《链表错题本.md》的Q19条目。
  */
 public class Q19_RemoveNthNodeFromEndOfList {
 

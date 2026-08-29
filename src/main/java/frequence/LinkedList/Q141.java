@@ -1,5 +1,11 @@
 package frequence.LinkedList;
 
+/**
+ * 141. 环形链表。
+ *
+ * <p><b>专题归类：</b>快慢指针、循环条件与初始化时序。复盘参见同目录
+ * 《链表通用技巧与题型分类.md》和《链表错题本.md》的Q141/Q142条目。
+ */
 public class Q141 {
     public class Solution {
         /**

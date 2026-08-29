@@ -1,5 +1,11 @@
 package frequence.LinkedList;
 
+/**
+ * 142. 环形链表 II。
+ *
+ * <p><b>专题归类：</b>快慢指针首次相遇、入环距离关系以及第二次同步相遇。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》和《链表错题本.md》的Q141/Q142条目。
+ */
 public class Q142 {
     public class Solution {
         /**

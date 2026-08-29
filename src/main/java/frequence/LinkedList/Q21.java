@@ -2,6 +2,9 @@ package frequence.LinkedList;
 /**
  * TODO: 【注意点】每次移动节点，都要移动两个链表(list1/list2 和 tail)
  *  - List1/List2 要移动(=list.next) && tail要移动（tail=tail.next）
+ *
+ * <p><b>专题归类：</b>两路有序归并、{@code dummy + tail}和双输入消费不变量。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》和《链表错题本.md》的Q21条目。
  */
 public class Q21 {
     public ListNode mergeTwoLists(ListNode list1, ListNode list2) {

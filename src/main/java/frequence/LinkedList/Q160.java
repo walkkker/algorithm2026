@@ -2,6 +2,9 @@ package frequence.LinkedList;
 
 /**
  * 相交节点：有错误！！！   遍历完len后，需要重新对cur1,cur2赋值。
+ *
+ * <p><b>专题归类：</b>长度对齐、指针换道和节点引用身份比较。复盘参见同目录
+ * 《链表通用技巧与题型分类.md》和《链表错题本.md》的Q160条目。
  */
 public class Q160 {
 

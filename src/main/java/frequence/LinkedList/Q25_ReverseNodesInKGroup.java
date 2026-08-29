@@ -11,6 +11,9 @@ package frequence.LinkedList;
  * <p>给定链表头结点 {@code head} 和正整数 {@code k}，每 {@code k} 个节点为一组进行翻转，
  * 并返回修改后的链表头结点。若最后剩余节点不足 {@code k} 个，则保持其原有顺序。
  * 必须通过调整节点连接关系完成翻转，不能只修改节点内部的值。
+ *
+ * <p><b>专题归类：</b>分组边界检查、区间反转、前驱重连和反转后的头尾身份交换。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》和《链表错题本.md》的Q25条目。
  */
 public class Q25_ReverseNodesInKGroup {
 

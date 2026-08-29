@@ -11,6 +11,9 @@ package frequence.LinkedList;
  * 必须通过调整节点连接关系完成交换，不能只修改节点内部的值。
  *
  * TODO: 【错误】链表反转/改指针，最好的办法就是使用 引用。 不要一直赋值.next .next指针，容易错
+ *
+ * <p><b>专题归类：</b>dummy、分组前驱、固定长度局部反转、新头/新尾重连；它是Q25的
+ * 最小分组原型。参见同目录《链表通用技巧与题型分类.md》和《链表错题本.md》的Q24条目。
  */
 public class Q24_SwapNodesInPairs {
 

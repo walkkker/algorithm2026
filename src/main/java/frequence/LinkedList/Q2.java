@@ -1,5 +1,11 @@
 package frequence.LinkedList;
 
+/**
+ * 2. 两数相加。
+ *
+ * <p><b>专题归类：</b>多链表同步遍历、进位状态、{@code dummy + tail}结果链构造。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》的“基础遍历与构造”以及《链表错题本.md》的Q2条目。
+ */
 public class Q2 {
     /**
      TODO：【错误点】又是while最后忘了 移动链表。 （while里面逻辑一多，就容易忘记移动链表）

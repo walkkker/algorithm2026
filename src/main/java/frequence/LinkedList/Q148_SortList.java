@@ -5,6 +5,10 @@ package frequence.LinkedList;
  *
  * <p>给定链表头结点 {@code head}，将链表中的节点按照节点值升序排列，
  * 并返回排序后链表的头结点。
+ *
+ * <p><b>专题归类：</b>快慢指针找中点、主动断链、递归缩小问题和两路归并。
+ * 复盘参见同目录《链表通用技巧与题型分类.md》、《链表错题本.md》以及
+ * {@code sort/linkedListSort/LinkedListSortNotes.md}。
  */
 public class Q148_SortList {
 
