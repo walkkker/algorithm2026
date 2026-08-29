@@ -51,6 +51,91 @@ import java.util.*;
  */
 public class Q54 {
 
+    /**
+     * 2026-08-30 我的分圈结构版本。
+     *
+     * <p>{@code m != n}说明matrix可以是矩形。本题属于【左神分圈结构】的【正方形扩展】。
+     * 扩展点只有一个：左上角、右下角同步收缩后，剩余区域可能退化，必须分别处理base case。
+     *
+     * <p>经手工画图，收缩之后只可能出现四种状态：
+     * <ol>
+     *     <li>只剩一行。</li>
+     *     <li>只剩一列。</li>
+     *     <li>行边界或列边界直接越界，外层循环终止。</li>
+     *     <li>仍然是正常矩形，继续按照四条边收集一圈。</li>
+     * </ol>
+     *
+     * <p>TODO：【错误点-特别注意点】只剩一行或一列时必须单独处理，不能继续使用正常分圈
+     * 的四边逻辑，否则同一个元素会被两条边重复收集。
+     *
+     * <p><b>这版思路清晰的原因：</b>
+     * <ul>
+     *     <li>{@code p1}和{@code p2}始终描述当前尚未访问矩形的左上角和右下角。</li>
+     *     <li>外层while只负责判断矩形是否仍然存在，并在每轮结束后同步收缩边界。</li>
+     *     <li>{@code oneLine}只处理退化矩形，{@code circle}只处理至少两行两列的正常矩形。</li>
+     *     <li>正常圈的四条边都采用“包含起点、排除终点”，四个角恰好各访问一次。</li>
+     * </ul>
+     *
+     * <p>时间复杂度为O(MN)，每个元素只加入答案一次；除返回结果外，额外空间为O(1)。
+     */
+    public static class Solution20260830 {
+
+        public List<Integer> spiralOrder(int[][] matrix) {
+            int m = matrix.length;
+            int n = matrix[0].length;
+            int[] p1 = new int[]{0, 0};
+            int[] p2 = {m - 1, n - 1};
+            List<Integer> ans = new ArrayList<>();
+
+            // 行、列边界必须同时合法；矩形可能先耗尽行，也可能先耗尽列。
+            while (p1[0] <= p2[0] && p1[1] <= p2[1]) {
+                if (p1[0] == p2[0] || p1[1] == p2[1]) {
+                    oneLine(matrix, p1, p2, ans);
+                } else {
+                    circle(matrix, p1, p2, ans);
+                }
+                p1[0]++;
+                p1[1]++;
+                p2[0]--;
+                p2[1]--;
+            }
+            return ans;
+        }
+
+        /**
+         * 处理退化矩形：只剩一行或只剩一列。若只剩一个点，会进入“一行”分支并只收集一次。
+         */
+        private void oneLine(int[][] matrix, int[] p1, int[] p2, List<Integer> ans) {
+            if (p1[0] == p2[0]) {
+                for (int j = p1[1]; j <= p2[1]; j++) {
+                    ans.add(matrix[p1[0]][j]);
+                }
+            } else {
+                for (int i = p1[0]; i <= p2[0]; i++) {
+                    ans.add(matrix[i][p1[1]]);
+                }
+            }
+        }
+
+        /**
+         * 收集至少包含两行、两列的正常矩形外圈。四条边均包含起点、排除终点。
+         */
+        private void circle(int[][] matrix, int[] p1, int[] p2, List<Integer> ans) {
+            for (int j = p1[1]; j < p2[1]; j++) {
+                ans.add(matrix[p1[0]][j]);
+            }
+            for (int i = p1[0]; i < p2[0]; i++) {
+                ans.add(matrix[i][p2[1]]);
+            }
+            for (int j = p2[1]; j > p1[1]; j--) {
+                ans.add(matrix[p2[0]][j]);
+            }
+            for (int i = p2[0]; i > p1[0]; i--) {
+                ans.add(matrix[i][p1[1]]);
+            }
+        }
+    }
+
     // TODO：【错误点】题目不保证是个正方形（左神教的那个是正方形），本题需要更强的拓展。 可能是矩形，错误case：[[6,9,7]] => 输出是6,9,7,9
     // TODO: 【必看：核心错误点】详细说来，就是有可能会退化成 【单行/单列/单点】，此时左上角右下角的分圈结构不适用。 需要分类讨论，单独遍历。
 
