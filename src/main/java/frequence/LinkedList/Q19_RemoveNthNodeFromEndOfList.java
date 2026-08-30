@@ -11,6 +11,55 @@ package frequence.LinkedList;
  */
 public class Q19_RemoveNthNodeFromEndOfList {
 
+    /**
+     * 2026-08-31 我的两次遍历实现。
+     *
+     * <p><b>难点1：倒数位置转换为正序位置。</b>位置使用1-based：
+     * <pre>{@code
+     * 倒数第1个 -> 正序第len个
+     * 倒数第2个 -> 正序第len-1个
+     * 倒数第n个 -> 正序第len-n+1个
+     * }
+     * </pre>
+     * 因此目标节点的正序位置是{@code k = len - n + 1}。
+     *
+     * <p><b>难点2：节点位置不等于移动次数。</b>删除正序第k个节点，需要先停在它的前驱，
+     * 即正序第{@code k-1}个节点。从第1个节点{@code head}出发，到达第{@code k-1}个节点
+     * 只需要移动：
+     * <pre>{@code
+     * (k - 1) - 1 = k - 2 次
+     * }
+     * </pre>
+     * 例如删除第5个节点，需要停在第4个节点；从第1个节点出发移动3次即可。
+     */
+    public class Solution20260831 {
+
+        public ListNode removeNthFromEnd(ListNode head, int n) {
+            ListNode cur = head;
+            int len = 0;
+            while (cur != null) {
+                len++;
+                cur = cur.next;
+            }
+
+            // TODO: 【难点1-确定正序位置】1-based：倒1->len，倒2->len-1，倒n->len-n+1。
+            int k = len - n + 1;
+            if (k == 1) {
+                return head.next;
+            } else {
+                cur = head;
+                // TODO: 【难点2-区分位置和移动次数】删除第k个节点，要停在第k-1个前驱；
+                // 从第1个节点出发，只需移动k-2次。例如删除第5个节点，移动3次到第4个节点。
+                k = k - 2;
+                while (k-- > 0) {
+                    cur = cur.next;
+                }
+                cur.next = cur.next.next;
+                return head;
+            }
+        }
+    }
+
     public ListNode removeNthFromEnd(ListNode head, int n) {
         int len = 0;
         ListNode cur = head;
