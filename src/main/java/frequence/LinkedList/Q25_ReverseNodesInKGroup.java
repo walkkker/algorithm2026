@@ -17,6 +17,87 @@ package frequence.LinkedList;
  */
 public class Q25_ReverseNodesInKGroup {
 
+    /**
+     * 2026-08-31 我的四节点变量分组反转实现。
+     *
+     * <p><b>核心思路：</b>{@code dummy + pre、start、end、endNext}。先把本轮会受到
+     * 指针修改影响的四个边界节点保存下来，完成反转后再依据它们的固定语义重新连接：
+     * <pre>{@code
+     * 反转前：pre -> start -> ... -> end -> endNext
+     * 反转后：pre -> end   -> ... -> start -> endNext
+     * }
+     * 因此{@code end}成为新头，{@code start}成为新尾，下一轮前驱必须更新为{@code start}。
+     *
+     * <p><b>退出时机：</b>
+     * <ul>
+     *     <li>{@code while (pre.next != null)}负责所有节点恰好按k倍数处理完成后的正常终止。</li>
+     *     <li>{@code countK(start, k) == null}负责识别末尾不足k个节点，并保持它们原有顺序。</li>
+     * </ul>
+     * 只有{@code countK}能够区分“完整k个且end恰好是尾节点”和“不足k个”：两种情况下都可能
+     * 看到链表尾部，所以不能使用{@code end.next == null}判断分组是否完整。
+     *
+     * <p><b>有限区间反转：</b>必须在修改指针前把{@code end.next}保存到稳定变量
+     * {@code endNext}。反转过程中{@code end.next}本身会改变，不能把动态表达式
+     * {@code end.next}直接放入循环终止条件。标准循环判断当前节点：
+     * {@code while (cur != endNext)}，而不是判断{@code cur.next}。
+     */
+    public class Solution20260831 {
+
+        public ListNode reverseKGroup(ListNode head, int k) {
+            ListNode dummy = new ListNode(0);
+            dummy.next = head;
+            ListNode pre = dummy;
+
+            while (pre.next != null) {
+                ListNode start = pre.next;
+                ListNode end = countK(start, k);
+
+                // TODO: 【错误-遗漏】不能使用end.next == null判断“不足k个”。
+                // 当本组恰好有k个并且end正好是链表尾节点时，end.next同样为null。
+                // 必须让countK仅在不足k个时返回null。
+                if (end == null) {
+                    break;
+                }
+
+                ListNode endNext = end.next;
+                reverse(start, end);
+
+                pre.next = end;
+                start.next = endNext;
+                pre = start;
+            }
+            return dummy.next;
+        }
+
+        /**
+         * 从head开始数k个节点：完整k个时返回第k个节点end，不足k个时返回null。
+         */
+        public ListNode countK(ListNode head, int k) {
+            k--;
+            while (head.next != null && k > 0) {
+                head = head.next;
+                k--;
+            }
+            return k > 0 ? null : head;
+        }
+
+        public ListNode reverse(ListNode head, ListNode end) {
+            ListNode pre = null;
+            ListNode cur = head;
+
+            // TODO: 【超级错误修正】end.next在反转过程中会改变，必须在修改指针前冻结边界。
+            ListNode endNext = end.next;
+            while (cur != endNext) {
+                // TODO: 【边界判断修正】判断cur是否到达固定终点，不能写cur.next != endNext。
+                ListNode next = cur.next;
+                cur.next = pre;
+                pre = cur;
+                cur = next;
+            }
+            return pre;
+        }
+    }
+
     public ListNode reverseKGroup(ListNode head, int k) {
         if (head == null) {
             return null;
