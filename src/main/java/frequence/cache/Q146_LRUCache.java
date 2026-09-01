@@ -42,6 +42,109 @@ import java.util.*;
  */
 public class Q146_LRUCache {
 
+    /**
+     * 2026-09-01 我的LRU实现。
+     *
+     * <p><b>核心结构：</b>{@code HashMap<key, Node>}负责在平均{@code O(1)}时间定位节点；
+     * 双向链表负责在{@code O(1)}时间删除、插入和移动已知节点。链表顺序约定为：
+     * <pre>
+     * dummy &lt;-&gt; MRU ... LRU &lt;-&gt; end
+     * </pre>
+     *
+     * <p><b>操作拆分：</b>
+     * <ul>
+     *     <li>{@code addToHead(node)}：把指定节点插入MRU位置。</li>
+     *     <li>{@code deleteNode(node)}：从双向链表删除指定节点。</li>
+     *     <li>{@code moveToHead(node)}：先删除，再插入MRU位置。</li>
+     * </ul>
+     * 三个方法都接收已经定位好的Node，因此只修改结构，不需要返回Node。
+     *
+     * <p><b>本次错误一：</b>Node构造器需要{@code key/value}两个参数，哨兵节点也必须传入两个参数。
+     * <p><b>本次错误二：</b>{@code moveToHead}删除节点后误调用自身，会形成没有终止条件的递归，
+     * 最终触发{@link StackOverflowError}。正确组合是{@code deleteNode(node)}之后调用
+     * {@code addToHead(node)}。
+     */
+    public static class LRUCache20260901 {
+        Node dummy;
+        Node end;
+        HashMap<Integer, Node> map;
+        int cap;
+
+        public LRUCache20260901(int capacity) {
+            // TODO: 【错误】Node构造器要求key和value两个参数，哨兵节点同样不能只传一个参数。
+            // 错误写法：dummy = new Node(0); end = new Node(0);
+            dummy = new Node(0, 0);
+            end = new Node(0, 0);
+            dummy.next = end;
+            end.last = dummy;
+            map = new HashMap<>();
+            cap = capacity;
+        }
+
+        public int get(int key) {
+            Node node = map.get(key);
+            if (node == null) {
+                return -1;
+            }
+            moveToHead(node);
+            return node.val;
+        }
+
+        public void put(int key, int value) {
+            Node node = map.get(key);
+            if (node != null) {
+                node.val = value;
+                moveToHead(node);
+                return;
+            }
+
+            if (map.size() == cap) {
+                Node lru = end.last;
+                map.remove(lru.key);
+                deleteNode(lru);
+            }
+
+            Node newNode = new Node(key, value);
+            map.put(key, newNode);
+            addToHead(newNode);
+        }
+
+        // 传入的是已经确定的Node，方法只负责修改链表结构，因此不需要返回Node。
+        private void addToHead(Node node) {
+            Node first = dummy.next;
+            dummy.next = node;
+            node.next = first;
+            first.last = node;
+            node.last = dummy;
+        }
+
+        private void deleteNode(Node node) {
+            node.last.next = node.next;
+            node.next.last = node.last;
+            node.last = null;
+            node.next = null;
+        }
+
+        private void moveToHead(Node node) {
+            deleteNode(node);
+            // TODO: 【致命错误】这里不能再次调用moveToHead(node)，否则形成无限递归并栈溢出。
+            // 错误写法：moveToHead(node);
+            addToHead(node);
+        }
+
+        private static class Node {
+            int key;
+            int val;
+            Node last;
+            Node next;
+
+            Node(int key, int val) {
+                this.key = key;
+                this.val = val;
+            }
+        }
+    }
+
     // TODO: 【可优化-封装性】这些字段均属于内部实现，可以声明为private；初始化后不换引用的字段可进一步声明为final。
     HashMap<Integer, Node> map;
     Node head;
