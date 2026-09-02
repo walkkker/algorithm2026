@@ -17,6 +17,62 @@ import java.util.*;
  */
 public class Q105_ConstructBinaryTreeFromPreorderAndInorderTraversal {
 
+    /**
+     * 2026-09-03 复写版本：前序确定根节点，中序确定左右子树范围，并使用HashMap优化根位置查询。
+     *
+     * <p><b>递归契约：</b>根据{@code preorder[preL..preR]}和
+     * {@code inorder[inL..inR]}构造同一棵子树，并返回该子树根节点。
+     * 前序区间首元素是当前根；根在中序区间中的位置决定左子树节点数：
+     * {@code leftSize = rootIndex - inL}。四个子区间必须全部由这个长度统一推导。
+     *
+     * <p><b>复杂度：</b>预处理HashMap需要O(N)时间和O(N)空间；每个节点只创建一次，因此构造
+     * 阶段为O(N)，递归栈为O(H)。若每层都线性扫描中序数组，斜树情况下会退化为O(N^2)。
+     *
+     * <p><b>重要前提：</b>节点值不能重复。否则{@code value -> inorderIndex}不能唯一确定根位置，
+     * 仅凭前序和中序遍历通常也不能唯一还原二叉树。
+     *
+     * <p><b>状态初始化：</b>在入口方法中重新创建{@code map}，可以确保同一个Solution对象连续
+     * 调用{@code buildTree}时，每次调用都使用独立索引状态。字段声明处初始化并不必然导致本题
+     * 出错，但复用同一个可变Map会保留旧条目；入口处重建更符合“每次调用状态隔离”的原则。
+     */
+    class Solution20260903 {
+
+        HashMap<Integer, Integer> map;
+
+        public TreeNode buildTree(int[] preorder, int[] inorder) {
+            // TODO: 【注意点】入口处重新初始化，避免可变字段跨多次buildTree调用保留旧状态。
+            map = new HashMap<>();
+            for (int i = 0; i < inorder.length; i++) {
+                map.put(inorder[i], i);
+            }
+            return process(preorder, 0, preorder.length - 1,
+                    inorder, 0, inorder.length - 1);
+        }
+
+        /**
+         * 当前两组闭区间都表示同一棵待构造子树。
+         */
+        private TreeNode process(int[] pre, int preL, int preR,
+                                 int[] in, int inL, int inR) {
+            if (preL > preR) {
+                return null;
+            }
+
+            int rootValue = pre[preL];
+            int rootIndex = map.get(rootValue);
+            int leftSize = rootIndex - inL;
+            // TODO: 【可精简】rightSize可以帮助理解区间，但当前公式没有使用该变量。
+            int rightSize = inR - rootIndex;
+
+            TreeNode cur = new TreeNode(rootValue);
+            cur.left = process(pre, preL + 1, preL + leftSize,
+                    in, inL, rootIndex - 1);
+            cur.right = process(pre, preL + leftSize + 1, preR,
+                    in, rootIndex + 1, inR);
+            return cur;
+        }
+    }
+
 
     /**
      * TODO:  这是做的第一个版本。 不是最优解。
