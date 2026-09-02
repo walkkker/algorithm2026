@@ -15,6 +15,51 @@ import java.util.*;
  */
 public class Q199_BinaryTreeRightSideView {
 
+    /**
+     * 2026-09-03 复写版本：使用 {@code curEnd/nextEnd} 标记层边界。
+     *
+     * <p><b>本次错误：</b>创建了队列，却遗漏了 {@code queue.add(root)}。BFS初始化包含两个
+     * 相互独立的步骤：创建用于保存待处理节点的队列，以及把搜索起点放入队列。只完成第一步时，
+     * 队列从始至终为空，{@code while (!queue.isEmpty())}一次也不会执行，方法会静默返回空结果。
+     * 这种错误通常不抛异常，因此比直接报错更容易被忽略。
+     *
+     * <p>孩子按“先左后右”的顺序入队，所以每层最后出队的节点就是从右侧能看到的节点。
+     * 每次加入孩子时更新{@code nextEnd}；处理到{@code curEnd}时，当前层结束，收集当前节点并
+     * 将{@code curEnd}更新为下一层的最后一个节点。
+     */
+    class Solution20260903 {
+
+        public List<Integer> rightSideView(TreeNode root) {
+            if (root == null) {
+                return new ArrayList<>();
+            }
+            List<Integer> ans = new ArrayList<>();
+            // 分层BFS：curEnd是当前层最后一个节点，nextEnd是目前发现的下一层最后一个节点。
+            TreeNode curEnd = root;
+            TreeNode nextEnd = null;
+            Queue<TreeNode> queue = new LinkedList<>();
+            // TODO: 【错误-遗漏】BFS初始化包含“创建队列 + 起点入队”，不能只创建空队列。
+            // 错误后果：队列为空，while一次也不执行，最终静默返回空List。
+            queue.add(root);
+            while (!queue.isEmpty()) {
+                TreeNode cur = queue.poll();
+                if (cur.left != null) {
+                    queue.add(cur.left);
+                    nextEnd = cur.left;
+                }
+                if (cur.right != null) {
+                    queue.add(cur.right);
+                    nextEnd = cur.right;
+                }
+                if (cur == curEnd) {
+                    curEnd = nextEnd;
+                    ans.add(cur.val);
+                }
+            }
+            return ans;
+        }
+    }
+
     public List<Integer> rightSideView(TreeNode root) {
         if (root == null) {
             return new ArrayList<>();
