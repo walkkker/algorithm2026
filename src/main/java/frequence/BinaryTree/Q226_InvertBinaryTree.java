@@ -7,6 +7,19 @@ package frequence.BinaryTree;
  *
  * <p><b>专题归类：</b>直接递归改写；覆盖{@code left/right}前必须冻结原子树入口。
  * 参见同目录《二叉树通用技巧与题型分类.md》和《二叉树错题本.md》的Q226条目。
+ *
+ * <p><b>2026-09-02致命错误复盘：</b>下面两条Java语句按顺序执行，不是同时交换：
+ * <pre>{@code
+ * cur.left = process(cur.right);
+ * cur.right = process(cur.left);
+ * }</pre>
+ * 假设原左子树为L、原右子树为R。第一行执行完以后，{@code cur.left}已经变成
+ * {@code process(R)}的结果；第二行读取的{@code cur.left}是覆盖后的新值，不再是L。
+ * 因此原左子树L失去入口，右子树还可能被重复处理并同时被left/right引用。
+ *
+ * <p>通用原则：对象字段出现在赋值号左侧时，该字段会在语句完成后立即被覆盖。如果后续语句
+ * 仍需要它的旧值，必须在覆盖前保存到独立局部变量。多写引用不是冗余，而是在隔离原结构和
+ * 目标结构。
  */
 public class Q226_InvertBinaryTree {
 
@@ -21,15 +34,18 @@ public class Q226_InvertBinaryTree {
         if (cur == null) {
             return null;
         }
-        // TODO：【错误如下】
+        // TODO：【致命错误-覆盖后读取新值】下面两行不是同时交换，而是按顺序执行。
         //   cur.left = process(cur.right);
-        //   cur.right = process(cur.left);   TODO: 这里cur.left已经被覆盖了，左树已经丢失
+        //   cur.right = process(cur.left);
+        // 第一行结束后cur.left已经指向翻转后的原右子树；第二行读取的是这个新值，
+        // 原左子树入口已经丢失。还可能造成左右字段引用同一棵子树。
 
-        // TODO: 【注意】你要注意，swap方法表明，只有等号右侧的值，可以再使用，因为没有被覆盖！！ 对于等号左侧的值而言，【尤其指针】，一定注意被覆盖的问题。
+        // TODO: 【正确修正】在任何覆盖发生前，先冻结原左右子树入口。
         TreeNode leftHead = cur.left;
         TreeNode rightHead = cur.right;
 
-        cur.left = process(rightHead);  // TODO: 看来【额外建立引用】，而不是（省代码）用指针 代替入口，是一个很好的习惯，能够在思维不细致的情况下 避免指针值被覆盖/遗漏被修改的问题。 （reverseLinkedList 就是引用）
+        // 右侧只读取独立局部变量，不再依赖已经被覆盖的cur.left/cur.right字段。
+        cur.left = process(rightHead);
         cur.right = process(leftHead);
 
         return cur;
