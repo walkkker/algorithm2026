@@ -17,6 +17,49 @@ package frequence.BinaryTree;
 public class Q114_FlattenBinaryTreeToLinkedList {
 
     /**
+     * 2026-09-03 复写版本：不使用递归栈或额外容器，直接在原树上重排前序后继关系。
+     *
+     * <p><b>核心步骤：</b>当{@code cur}存在左子树时，先找到左子树当前结构中的最右节点
+     * {@code des}，令{@code des.right = cur.right}保存原右子树；再把原左子树移动到
+     * {@code cur.right}；最后清空{@code cur.left}。之后始终沿新的right指针继续处理。
+     *
+     * <p><b>本次遗漏：</b>重连{@code cur.right = cur.left}后，忘记执行
+     * {@code cur.left = null}。清空left不是可选的整理动作，而是题目要求和循环不变量的一部分：
+     * 已处理节点必须只通过right连接。如果遗漏，节点会同时保留left和right对同一子树的引用，
+     * 最终结构仍然不是题目要求的单链表。
+     *
+     * <p><b>文字笔误：</b>应当记为“左子树最右节点{@code .right = cur.right}”，用于接住
+     * 原右子树；不能写成{@code .right = cur.left}，否则会错误地指回左子树。
+     */
+    class Solution20260903 {
+
+        public void flatten(TreeNode root) {
+            /*
+             * 思路：目标顺序是前序遍历，即根、左、右。
+             * 每个节点先让左子树最右节点.right接住cur.right，再把左子树移动到cur.right。
+             * 遍历方向始终沿right指针前进。
+             */
+            TreeNode cur = root;
+            while (cur != null) {
+                // Step1：存在左子树时，先保存原右子树，再把左子树移动到右侧。
+                if (cur.left != null) {
+                    TreeNode des = cur.left;
+                    while (des.right != null) {
+                        des = des.right;
+                    }
+                    des.right = cur.right;
+                    cur.right = cur.left;
+                    // TODO: 【错误-遗漏】别忘了cur.left置为null。
+                    // 原因：题目要求展开后所有left都为空，这也是“已处理部分已经成为单链”的不变量。
+                    cur.left = null;
+                }
+                // Step2：新的right就是前序序列中的下一个待处理节点。
+                cur = cur.right;
+            }
+        }
+    }
+
+    /**
      * 递归通用框架：先分别展开左右子树，再由当前节点完成两条链表的拼接。
      *
      * <p>时间复杂度为O(N)，递归栈空间为O(H)。
