@@ -128,6 +128,10 @@ BST有序性这一独立性质。
 | `LevelTraversalBT` | BFS队列 |
 | `Morris` | 使用左子树最右节点的空闲right指针建立临时线索，额外空间O(1) |
 
+当前Hot 100学习包中已经补充标准题号版本：
+
+- [Q297 二叉树的序列化与反序列化](./Q297_SerializeAndDeserializeBinaryTree.java)：前序协议、`#`空节点标记、按相同协议递归建树。
+
 ## 五、建议处理顺序
 
 ```text
