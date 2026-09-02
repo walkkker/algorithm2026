@@ -66,6 +66,11 @@ public class Q114_FlattenBinaryTreeToLinkedList {
     /**
      * 原地版本：时间复杂度O(N)，额外空间复杂度O(1)，这是渐进复杂度最优解。
      *
+     * <p><b>O(1)的准确含义：</b>本方法不使用递归，因此没有系统递归栈；也不使用显式Stack、
+     * Queue、数组或集合。只使用cur和leftRightMost等固定数量的节点引用，所需辅助空间不会
+     * 随节点数N或树高H增长。O(1)不表示一个局部变量都不能使用，而是变量数量保持常数级。
+     * 输入树本身以及题目要求原地形成的right链不计入额外空间。
+     *
      * <p>真正的核心不是“一次性展开左子树”，而是重新安排后续处理顺序：
      * 前序遍历要求cur之后先处理左子树，再处理原右子树。递归/显式栈会暂存原右子树；
      * 原地版本则把原右子树挂到左子树的右边界，直接使用树本身的指针保存待处理任务。
@@ -79,15 +84,28 @@ public class Q114_FlattenBinaryTreeToLinkedList {
      * <p>循环不变量：cur之前的right链已经完全展开；以cur开始的结构仍然包含尚未处理的
      * 前序序列。本轮只修改cur和leftRightMost两个节点，共写入三个指针字段。
      *
+     * <p><b>微观理解：</b>对于每个存在左子树的cur，都把左子树插入“cur与原右子树”之间：
+     * <pre>
+     * cur -> 左子树 -> 原右子树
+     * </pre>
+     * 然后执行{@code cur = cur.right}，继续用同样规则处理前序序列中的下一个节点。
+     *
+     * <p><b>宏观结果：</b>每轮都让cur的right先指向左子树，并把原右子树安排在完整左子树之后；
+     * 同时清空cur.left。所有节点处理完成后，每个left都为null，所有节点只通过right连接，
+     * right链顺序正好是“根、左子树、右子树”的前序遍历顺序。
+     *
      * <p>注意：leftRightMost不一定已经是左子树最终前序链表的尾节点。如果它还存在左子树，
      * 后续处理到它时，会继续把暂存在right上的原右子树向后移动，因此最终仍能保证
-     * “完整左子树在前、原右子树在后”。
+     * “完整左子树在前、原右子树在后”。所以更准确的术语是“当前结构中的左子树右边界节点”，
+     * 不能简单理解为此刻已经确定的“前序最后节点”。
      */
     public void flatten(TreeNode root) {
         TreeNode cur = root;
         while (cur != null) {
             if (cur.left != null) {
 
+                // leftRightMost是当前结构中的左子树右边界节点；它不一定已经是完整左子树
+                // 最终前序链的尾节点，后续沿right遍历时还会继续处理它内部尚未搬移的左子树。
                 TreeNode leftRightMost = cur.left;
                 while (leftRightMost.right != null) {
                     leftRightMost = leftRightMost.right;
@@ -101,7 +119,8 @@ public class Q114_FlattenBinaryTreeToLinkedList {
                 cur.right = cur.left;
                 cur.left = null;
             }
-            // 无论本轮是否存在左子树，cur.right都指向前序序列中的下一个待处理节点。
+            // 遍历方向始终是cur = cur.right：本轮重连后，right正好指向前序序列中的下一个
+            // 待处理节点。微观上逐节点执行相同规则，宏观上最终形成完整前序right链。
             cur = cur.right;
         }
     }
