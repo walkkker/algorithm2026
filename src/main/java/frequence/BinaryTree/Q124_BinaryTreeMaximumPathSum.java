@@ -22,6 +22,86 @@ package frequence.BinaryTree;
  */
 public class Q124_BinaryTreeMaximumPathSum {
 
+    /**
+     * 2026-09-04 复写版本：使用Info同时维护“可继续向父节点延伸的单链”和“子树完整答案”。
+     *
+     * <p><b>Info定义：</b>
+     * <ul>
+     *     <li>{@code maxLine}：必须从当前子树根节点开始，只能选择一个孩子继续向下，
+     *     因而可以交给父节点继续拼接。</li>
+     *     <li>{@code maxSum}：当前子树内部任意合法路径的最大和，可以同时连接左右单链，
+     *     但它是最终候选答案，不能再交给父节点继续延伸。</li>
+     * </ul>
+     *
+     * <p><b>关键限制：</b>一条路径在当前节点最多连接“父、左、右”中的两个方向。
+     * {@code maxLine}如果同时选择左右孩子，再连接父节点就会形成三个方向的分叉，因此只能取
+     * {@code max(left.maxLine, right.maxLine, 0)}。只有计算以当前节点为最高连接点的完整路径时，
+     * 才能同时接收左右两条正贡献单链。
+     *
+     * <p>本实现显式区分叶节点、双子树和单子树，逻辑正确且便于逐类检查；也可以使用统一的
+     * 空树Info和同一组公式消除分支。时间复杂度O(N)，递归栈空间O(H)。
+     */
+    class Solution20260904 {
+
+        public int maxPathSum(TreeNode root) {
+            return process(root).maxSum;
+        }
+
+        // TODO: 【重点】为了让父节点能够连续拼接，maxLine必须经过当前节点；同理，父节点使用的
+        // l.maxLine/r.maxLine也必须分别经过左、右孩子的头节点。并且maxLine只能选择一边延伸。
+        public class Info {
+            int maxLine;
+            int maxSum;
+
+            public Info(int _l, int _s) {
+                maxLine = _l;
+                maxSum = _s;
+            }
+        }
+
+        public Info process(TreeNode cur) {
+            if (cur == null) {
+                return null;
+            }
+            Info l = process(cur.left);
+            Info r = process(cur.right);
+
+            int maxLine;
+            int maxSum;
+
+            if (l == null && r == null) {
+                return new Info(cur.val, cur.val);
+            } else if (l != null && r != null) {
+                // Step1：maxLine必须经过cur；选取的孩子maxLine也必须经过该孩子的头节点，
+                // 这样“cur -> child -> child.maxLine”才是一条连续路径。
+                // 只能选择一个孩子，或两个孩子都不选。
+                // TODO: 【易错点】不能把左右两条maxLine都放进maxLine，否则父节点再连接时会分叉。
+                maxLine = cur.val + Math.max(0, Math.max(l.maxLine, r.maxLine));
+
+                // Step2：计算以cur为最高连接点的完整路径；左右正贡献在这里才可以同时选择。
+                int throughCur = cur.val;
+                if (l.maxLine > 0) {
+                    throughCur += l.maxLine;
+                }
+                if (r.maxLine > 0) {
+                    throughCur += r.maxLine;
+                }
+
+                // Step3：完整答案可能经过cur，也可能完全位于左子树或右子树。
+                maxSum = Math.max(Math.max(r.maxSum, l.maxSum), throughCur);
+                return new Info(maxLine, maxSum);
+            } else {
+                Info available = l != null ? l : r;
+                maxLine = cur.val;
+                if (available.maxLine > 0) {
+                    maxLine += available.maxLine;
+                }
+                maxSum = Math.max(maxLine, available.maxSum);
+                return new Info(maxLine, maxSum);
+            }
+        }
+    }
+
     public int maxPathSum(TreeNode root) {
         Info info = process(root);
         return Math.max(info.yes, info.no);
