@@ -44,17 +44,20 @@ public class Q200_NumberOfIslands {
             int n = grid[0].length;
             UnionFind uf = new UnionFind(grid);
 
-            // TODO: 【原错误】只检查右、下没有问题，但不能因此漏掉最右列和最下行。
-            // 错误循环：i < m - 1且j < n - 1。
+            // TODO: 【错误】方向右下的思路是没错。但是右下对应下面的二重循环是错误的。
+            // 因为最右列存在向下，最下行存在向右。
+            // for (int i = 0; i < m - 1; i++) {
+            //     for (int j = 0; j < n - 1; j++) {
             for (int i = 0; i < m; i++) {
                 for (int j = 0; j < n; j++) {
-                    // TODO: 【边界顺序】先确认下方存在，才能读取grid[i + 1][j]。
-                    if (i + 1 < m && grid[i][j] == '1' && grid[i + 1][j] == '1') {
+                    // TODO: 【错误-优化】存在下节点，&& 当前节点和下节点都是'1'，则合并。
+                    // 这里的思想跟cur != null && cur.val == targetVal很像：先确保存在，才能取值比较。
+                    if (i + 1 < m && (grid[i][j] == '1' && grid[i + 1][j] == '1')) {
                         uf.union(i, j, i + 1, j);
                     }
-                    // TODO: 【边界顺序】先确认右方存在，才能读取grid[i][j + 1]。
-                    if (j + 1 < n && grid[i][j] == '1' && grid[i][j + 1] == '1') {
-                        uf.union(i, j, i, j + 1);
+                    // TODO: 【错误-优化】同理，有右方节点，&& 满足双节点都为'1'，则合并。
+                    if (j + 1 < n && (grid[i][j] == '1' && grid[i][j + 1] == '1')) {
+                        uf.union(i, j, i, j+1);
                     }
                 }
             }
@@ -92,15 +95,18 @@ public class Q200_NumberOfIslands {
                 return i * n + j;
             }
 
-            // TODO: 【接口分层】find只处理并查集内部的一维编号；二维坐标转换由union负责。
+            // TODO: 【错误】find不对外开放，所以参数不需要适配器(i,j)，只需要保留原样index。
+            // 对应地，union是对外接口，所以对(i,j)做适配，内部再转换为一维index。
+            // TODO: 【AI补充】更准确地说，这是内外接口的数据模型分层，不是private关键字本身决定的。
             private int find(int index) {
-                int stackSize = 0;
+                int stackI = 0;
                 while (index != parent[index]) {
-                    stack[stackSize++] = index;
+                    stack[stackI++] = index;
                     index = parent[index];
                 }
-                while (stackSize > 0) {
-                    parent[stack[--stackSize]] = index;
+
+                while (stackI > 0) {
+                    parent[stack[--stackI]] = index;
                 }
                 return index;
             }
@@ -111,8 +117,7 @@ public class Q200_NumberOfIslands {
                 int parent1 = find(index1);
                 int parent2 = find(index2);
 
-                // TODO: 【错误-特别注意】只有两个集合的代表节点不同，才允许合并并执行sets--。
-                if (parent1 != parent2) {
+                if (parent1 != parent2) {   // TODO: 【错误-特别注意】union的必要前提条件。一定不能缺了。
                     if (size[parent1] > size[parent2]) {
                         parent[parent2] = parent1;
                         size[parent1] += size[parent2];
@@ -136,9 +141,9 @@ public class Q200_NumberOfIslands {
      * <p>外层每发现一块未访问陆地，答案加一，然后DFS把整个四连通分量改成水域。
      * 每个格子最多被处理一次，时间复杂度O(MN)，递归栈最坏O(MN)。该算法会修改输入矩阵。
      *
-     * <p><b>原错误：</b>把访问标记写成NUL字符{@code 0}后，只判断了字符{@code '0'}，或者
-     * 反过来只判断NUL字符。Java中的{@code 0}和{@code '0'}不是同一个值：前者码值为0，
-     * 后者码值为48。最稳定的写法是统一写入{@code '0'}，并对所有非陆地执行返回。
+     * <p><b>原样保留说明：</b>下面保留复写时使用NUL字符{@code 0}作为感染标记，并同时判断
+     * {@code 0 || '0'}的代码。Java中的{@code 0}和{@code '0'}不是同一个值：前者码值为0，
+     * 后者码值为48。推荐方案只写在TODO中，不替换这份用于review的原代码。
      */
     class InfectSolution20260904 {
 
@@ -164,13 +169,16 @@ public class Q200_NumberOfIslands {
                 return;
             }
 
-            // TODO: 【原错误】字符'0'表示水域，不是陆地；数值0则是另一个NUL字符。
-            // 错误思路：写入grid[i][j] = 0，却只用grid[i][j] == '0'判断是否访问过。
-            // 统一约定：只有字符'1'需要继续感染，其余状态全部返回。
-            if (grid[i][j] != '1') {
+            // TODO: 【错误】你赋值为0，标记是感染对象。但是要注意'0'是水域，也要立即返回。
+            // if (grid[i][j] == 0) {
+            if (grid[i][j] == 0 || grid[i][j] == '0') {
                 return;
             }
-            grid[i][j] = '0';
+            // TODO: 【AI推荐】统一使用题目字符语义更清晰：
+            // if (grid[i][j] != '1') return;
+            // grid[i][j] = '0';
+            // 当前复盘版本保留原写法：使用NUL字符0作为“已经感染”标记。
+            grid[i][j] = 0;
             infect(grid, i - 1, j);
             infect(grid, i + 1, j);
             infect(grid, i, j - 1);
