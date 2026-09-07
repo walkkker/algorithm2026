@@ -47,6 +47,71 @@ import java.util.*;
  */
 public class Q207_CourseSchedule {
 
+    /**
+     * 2026-09-07 复写版本，原样保留HashMap入度表和邻接表实现。
+     *
+     * <p><b>邻接表初始化模板：</b>
+     * <pre>
+     * List&lt;List&lt;Integer&gt;&gt; adj = new ArrayList&lt;&gt;();
+     * for (int i = 0; i &lt; n; i++) {
+     *     adj.add(new ArrayList&lt;&gt;());
+     * }
+     *
+     * // 无向图需要添加两个方向
+     * adj.get(u).add(v);
+     * adj.get(v).add(u);
+     * </pre>
+     * Q207是有向图，先修关系{@code [a,b]}表示{@code b -> a}，因此只添加一个方向。
+     *
+     * <p><b>核心不变量：</b>{@code adj.get(u)}保存u指向的所有后继节点；建立边
+     * {@code u -> v}时必须执行{@code inDegree[v]++}。弹出u后，才逐个删除u对这些v贡献的入边。
+     * 时间复杂度O(V + E)，空间复杂度O(V + E)。
+     */
+    class Solution20260907 {
+
+        public boolean canFinish(int numCourses, int[][] prerequisites) {
+            HashMap<Integer, Integer> map = new HashMap<>();
+            List<List<Integer>> adj = new ArrayList<>();
+            for (int i = 0; i < numCourses; i++) {
+                adj.add(new ArrayList<>());
+                map.put(i, 0);
+            }
+
+            for (int[] pos : prerequisites) {
+                int u = pos[1];
+                int v = pos[0];
+                adj.get(u).add(v);  // 单向图
+                // TODO：【错误行】map.put(u, map.get(u) + 1);
+                // 入度表添加错误了。u -> v，应该是v的入度添加1。
+                map.put(v, map.get(v) + 1);
+            }
+
+            Queue<Integer> queue = new LinkedList<>();
+
+            // TODO: 【错误点】map是keySet() + values()
+            // for (Integer key : map) {
+            // TODO: 【AI补充】Map还有entrySet()；这里仅需要课程编号，所以使用keySet()正确。
+            for (Integer key : map.keySet()) {
+                if (map.get(key) == 0) {
+                    queue.add(key);
+                }
+            }
+
+            int count = 0;
+            while (!queue.isEmpty()) {
+                int u = queue.poll();
+                count++;
+                for (int v : adj.get(u)) {
+                    map.put(v, map.get(v) - 1);
+                    if (map.get(v) == 0) {
+                        queue.add(v);
+                    }
+                }
+            }
+            return count == numCourses;
+        }
+    }
+
     // TODO: 【错误版本，正确看下面的版本】
     //  【可以通过本题，因为本题只是检测是否有环，正向图无环则反向图也无环】但是下面代码 建图反了，因为对于 课程对理解反了[a,b]实际上是b->a。
     //   同时两个优化点：1. 因为节点范围确定[0, numCourses-1]，所以可以用int[] inMap 做入度统计。
