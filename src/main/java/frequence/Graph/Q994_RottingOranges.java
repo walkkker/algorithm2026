@@ -62,6 +62,71 @@ import java.util.*;
  */
 public class Q994_RottingOranges {
 
+    /**
+     * 2026-09-07 复写版本，保留原始四方向判断代码。
+     *
+     * <p><b>记忆链：</b>
+     * <ol>
+     *     <li>BFS意味着使用Queue保存等待扩散的节点。</li>
+     *     <li>多源意味着初始化时把所有腐烂橘子坐标{@code int[2]}同时加入Queue。</li>
+     *     <li>分层意味着每轮先冻结{@code levelSize = queue.size()}，本轮只poll这么多次；
+     *     本轮新加入的节点只能在下一分钟继续扩散。</li>
+     * </ol>
+     *
+     * <p>发现新鲜橘子后立即执行{@code grid = 2}、{@code fresh--}并入队，网格本身因此兼任
+     * visited结构，也能防止同一个橘子被同层的多个腐烂橘子重复入队。
+     * 时间复杂度O(MN)，队列空间最坏O(MN)。
+     */
+    class Solution20260907 {
+
+        public int orangesRotting(int[][] grid) {
+            Queue<int[]> queue = new LinkedList<>();
+            int fresh = 0;
+            int m = grid.length;
+            int n = grid[0].length;
+            int ans = 0;
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (grid[i][j] == 1) {
+                        fresh++;
+                    } else if (grid[i][j] == 2) {
+                        queue.add(new int[]{i, j});
+                    }
+                }
+            }
+            while (!queue.isEmpty() && fresh != 0) {
+                int levelSize = queue.size();
+                ans++;
+                for (int i = 0; i < levelSize; i++) {
+                    int[] cur = queue.poll();
+                    int row = cur[0];
+                    int col = cur[1];
+                    if (row - 1 >= 0 && grid[row - 1][col] == 1) {
+                        fresh--;
+                        grid[row - 1][col] = 2;
+                        queue.add(new int[]{row - 1, col});
+                    }
+                    if (row + 1 < m && grid[row + 1][col] == 1) {
+                        fresh--;
+                        grid[row + 1][col] = 2;
+                        queue.add(new int[]{row + 1, col});
+                    }
+                    if (col - 1 >= 0 && grid[row][col - 1] == 1) {
+                        fresh--;
+                        grid[row][col - 1] = 2;
+                        queue.add(new int[]{row, col - 1});
+                    }
+                    if (col + 1 < n && grid[row][col + 1] == 1) {
+                        fresh--;
+                        grid[row][col + 1] = 2;
+                        queue.add(new int[]{row, col + 1});
+                    }
+                }
+            }
+            return fresh == 0 ? ans : -1;
+        }
+    }
+
     public int orangesRotting(int[][] grid) {
         // TODO: 【可优化】LinkedList作为队列没有错误；ArrayDeque通常具有更低的常数开销。
         Queue<int[]> queue = new LinkedList<>();
