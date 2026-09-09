@@ -25,6 +25,74 @@ import java.util.*;
  */
 public class Q131_PalindromePartitioning {
 
+    /**
+     * 2026-09-09 复盘版本：回文区间DP预处理 + 回溯枚举切分位置。
+     *
+     * <p>这道题是在看过答案后完成的，复习时应重点独立说明两个状态：
+     * {@code dp[start][end]}回答当前候选子串是否为回文串；{@code start}回答回溯下一段
+     * 应该从哪里开始。DP只负责把回文判断降为O(1)，不会代替对所有分割方案的回溯枚举。
+     *
+     * <p>{@code end}是当前递归层的选择变量。选择闭区间{@code [start, end]}后，下一层必须
+     * 从{@code end + 1}继续；返回当前层后删除路径末尾元素，才能枚举下一个兄弟分支。
+     */
+    class SolutionReviewed20260909 {
+
+        /**
+         * 【错误点-注意】是boolean[][] dp, 不是 int[][] dp。
+         *
+         * 【解题思路】
+         * 1. dp解回文子串问题，但是保留boolean[][]，实现O(1)查询[start, end]是否为回文子串。
+         * 2. 递归回溯，核心是内部进行枚举（具体为end在[start, len)的所有位置全部枚举），
+         *    然后检查是否回文。
+         * 2.1 注意list记录选择 + 恢复现场。
+         */
+        public List<List<String>> partition(String s) {
+            char[] chs = s.toCharArray();
+            int len = chs.length;
+            boolean[][] dp = new boolean[len][len];
+            for (int i = len - 1; i >= 0; i--) {
+                for (int j = i; j < len; j++) {
+                    // TODO: 【AI补充-正确性】j-i<=2等价于区间长度<=3。
+                    // 长度为1或2时没有内部区间；长度为3且两端相等时，中间单字符天然回文。
+                    // 短区间必须先截断，才能避免访问dp[i+1][j-1]时出现非法下标。
+                    dp[i][j] = (chs[i] == chs[j]) && (j - i <= 2 || dp[i + 1][j - 1]);
+                }
+            }
+            List<String> tmp = new ArrayList<>();
+            List<List<String>> ans = new ArrayList<>();
+            process(chs, 0, tmp, dp, s, ans);
+            return ans;
+        }
+
+        private void process(
+                char[] chs,
+                int start,
+                List<String> list,
+                boolean[][] dp,
+                String s,
+                List<List<String>> ans) {
+
+            if (start == chs.length) {
+                // TODO: 【注意】必须保存路径快照，不能直接ans.add(list)。
+                ans.add(new ArrayList<>(list));
+
+                // TODO: 【错误-遗漏】base case收集答案后应立即return。
+                // 当前代码即使不return，下面的for也不会执行，因此结果暂时不受影响；
+                // 但终止条件的语义应当完整，避免以后在for循环前增加代码时产生越界或重复处理。
+                return;
+            }
+            for (int end = start; end < chs.length; end++) {
+                if (dp[start][end]) {
+                    // 当前层选择闭区间[start, end]，下一层从end+1开始。
+                    list.add(s.substring(start, end + 1));
+                    process(chs, end + 1, list, dp, s, ans);
+                    // TODO: 【回溯核心】list是所有递归分支共享的可变对象，返回后必须恢复现场。
+                    list.remove(list.size() - 1);
+                }
+            }
+        }
+    }
+
     public List<List<String>> partition(String s) {
         List<List<String>> ans = new ArrayList<>();
         List<String> tmp = new ArrayList<>();
