@@ -39,8 +39,69 @@ import java.util.List;
  * <p>本文件是“递归树生成全部排列”的回溯视角。Q31直接后继、基于Q31的字典序
  * 全排列和Q60阶乘反排名的横向对比，见
  * {@code frequence/permutation/字典序排列家族.md}。
+ *
+ * <p>递归函数定义、枚举行为、承接容器、答案快照和恢复现场的统一框架，见同目录
+ * 《回溯核心：递归树、枚举与恢复现场.md》。
  */
 public class Q46_Permutations {
+
+    /**
+     * 2026-09-11 复盘版本：先定义递归函数，再根据定义推导内部实现。
+     */
+    class SolutionReviewed20260911 {
+
+        public List<List<Integer>> permute(int[] nums) {
+            List<List<Integer>> ans = new ArrayList<>();
+            process(nums, 0, ans);
+            return ans;
+        }
+
+        /**
+         * 我的理解：
+         * 当前已经确定了前缀...i的数字排列，将剩余数字的全排列全部记录到ans里面。
+         * 【从左往右的尝试 or 递归树（/决策树）的DFS】
+         *
+         * 因为是回溯，所以还是有一个【枚举】行为。
+         *
+         * <p>TODO: 【AI补充-边界修正】上面的整体思路正确，但“前缀...i”容易把位置i误认为
+         * 已经确定。进入{@code process(arr, i, ans)}时，更精确的定义是：
+         * <pre>
+         * arr[0, i)          已经确定的排列前缀
+         * arr[i, arr.length) 尚未确定位置的剩余元素
+         * </pre>
+         *
+         * <p>本方法负责枚举{@code arr[i, arr.length)}的所有排列，并把由当前前缀产生的
+         * 完整排列加入{@code ans}。当前层的任务是确定位置{@code i}，所以枚举
+         * {@code k in [i, arr.length)}，选择{@code arr[k]}占据位置{@code i}。
+         *
+         * <p>TODO: 【AI补充-递归契约】递归定义还必须包含后置条件：
+         * 本方法返回时，{@code arr}必须恢复到进入方法时的状态。只有这样，当前递归节点的
+         * 每一个兄弟分支才能从相同的父状态开始枚举。
+         */
+        private void process(int[] arr, int i, List<List<Integer>> ans) {
+            if (i == arr.length) {
+                List<Integer> tmp = new ArrayList<>();
+                for (int ele : arr) {
+                    tmp.add(ele);
+                }
+                ans.add(tmp);
+                return;
+            }
+
+            // 当前递归层存在枚举行为：依次选择一个剩余元素放到位置i。
+            for (int k = i; k < arr.length; k++) {
+                swap(arr, i, k);          // 做选择
+                process(arr, i + 1, ans); // 固定[0,i+1)，继续排列剩余区间
+                swap(arr, i, k);          // 恢复现场，履行process的后置条件
+            }
+        }
+
+        private void swap(int[] arr, int i, int j) {
+            int tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+    }
 
     class Solution {
         public List<List<Integer>> permute(int[] nums) {
