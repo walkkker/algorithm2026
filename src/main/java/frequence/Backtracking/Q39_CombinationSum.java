@@ -31,6 +31,178 @@ import java.util.*;
  */
 public class Q39_CombinationSum {
 
+    /**
+     * 2026-09-12 复盘版本一：每层确定一种候选数使用多少次。
+     *
+     * <p><b>我的第一轮思路与错误：</b>
+     * <ol>
+     *     <li>枚举整个candidates，并使用target不断缩小来驱动递归；</li>
+     *     <li>错误地认为对candidates去重可以消除重复答案；</li>
+     *     <li>后来发现即使输入元素互不相同，仍会同时产生[2,2,3]和[2,3,2]；</li>
+     *     <li>进一步改为从左到右处理候选数，每层枚举当前数字使用多少次。</li>
+     * </ol>
+     *
+     * <p>TODO: 【AI修正-重复根因】第一版的问题不是输入存在重复数字，而是递归路径允许候选
+     * 下标任意回退，因此同一组合会按不同顺序重复生成。组合去重必须约束递归路径中的选择
+     * 顺序，不能只对输入数组做deduplicate。
+     *
+     * <p>TODO: 【AI修正-枚举范围】“无限次使用”是题目权限，不是当前层真的无限循环。
+     * 因为所有候选数均为正数，当前数字实际枚举次数为{@code 0..target / candidate}。
+     */
+    class SolutionCountReviewed20260912 {
+
+        public List<List<Integer>> combinationSum(int[] candidates, int target) {
+            List<Integer> path = new ArrayList<>();
+            List<List<Integer>> ans = new ArrayList<>();
+
+            // TODO: 【冗余】题目保证candidates元素互不相同，而且arr没有参与后续递归。
+            // 即使使用arr，也无法解决[2,2,3]与[2,3,2]这种“选择顺序重复”。
+            int[] arr = deduplicate(candidates);
+            // process(arr, path, ans, target);
+
+            process(candidates, 0, path, ans, target);
+            return ans;
+        }
+
+        /**
+         * 错误版本：每层重新扫描整个candidates。
+         *
+         * <p>它允许候选下标从1回到0，因此[2,3,2]和[3,2,2]会与[2,2,3]重复。
+         */
+        /*
+        private void process(
+                int[] candidates,
+                List<Integer> path,
+                List<List<Integer>> ans,
+                int target) {
+
+            if (target == 0) {
+                ans.add(new ArrayList<>(path));
+                return;
+            }
+
+            for (int candidate : candidates) {
+                if (target - candidate >= 0) {
+                    path.add(candidate);
+                    process(candidates, path, ans, target - candidate);
+                    path.remove(path.size() - 1);
+                }
+            }
+        }
+        */
+
+        /**
+         * 递归定义：
+         * candidates[0, i)中每个数字的使用次数已经确定；当前方法负责枚举
+         * candidates[i, n)的所有使用次数，使新增元素之和等于target，并把完整组合加入ans。
+         */
+        private void process(
+                int[] candidates,
+                int i,
+                List<Integer> path,
+                List<List<Integer>> ans,
+                int target) {
+
+            if (i == candidates.length) {
+                if (target == 0) {
+                    ans.add(new ArrayList<>(path));
+                }
+                return;
+            }
+
+            int candidate = candidates[i];
+
+            // TODO: 【错误-遗漏】当前候选数使用0次也是一条必要分支。
+            // base case只能判断何时结束，不能代替缺失的状态转移。
+            // 例如candidates=[2,3], target=3，只有跳过2，才能得到答案[3]。
+            process(candidates, i + 1, path, ans, target);
+
+            int count = 0;
+            // TODO: 【通用性】题目约束下乘法安全；通用写法可使用times<=target/candidate。
+            for (int times = 1; candidate * times <= target; times++) {
+                count = times;
+                path.add(candidate);
+                process(
+                        candidates,
+                        i + 1,
+                        path,
+                        ans,
+                        target - candidate * times
+                );
+            }
+
+            // 本层累计加入了count个candidate，统一恢复到进入方法时的父路径。
+            while (count-- > 0) {
+                path.remove(path.size() - 1);
+            }
+        }
+
+        private int[] deduplicate(int[] arr) {
+            HashSet<Integer> set = new HashSet<>();
+            for (int num : arr) {
+                set.add(num);
+            }
+            int[] ans = new int[set.size()];
+            int index = 0;
+            for (int num : set) {
+                ans[index++] = num;
+            }
+            return ans;
+        }
+    }
+
+    /**
+     * 2026-09-12 复盘版本二：标准start + remaining回溯。
+     *
+     * <p>每层选择下一个加入路径的候选数，并保证候选下标不下降。递归传入当前下标
+     * {@code index}而不是{@code index + 1}，表示同一个候选数可以继续重复使用。
+     */
+    class SolutionStartReviewed20260912 {
+
+        public List<List<Integer>> combinationSum(int[] candidates, int target) {
+            Arrays.sort(candidates);
+            List<Integer> path = new ArrayList<>();
+            List<List<Integer>> ans = new ArrayList<>();
+            process(candidates, 0, target, path, ans);
+            return ans;
+        }
+
+        /**
+         * 递归定义：
+         * path中已经选择的候选下标保持非递减；本方法只允许从candidates[start, n)
+         * 选择下一个数字，枚举所有新增元素之和为remaining的组合。
+         */
+        private void process(
+                int[] candidates,
+                int start,
+                int remaining,
+                List<Integer> path,
+                List<List<Integer>> ans) {
+
+            if (remaining == 0) {
+                ans.add(new ArrayList<>(path));
+                return;
+            }
+
+            for (int index = start; index < candidates.length; index++) {
+                if (candidates[index] > remaining) {
+                    break;
+                }
+
+                path.add(candidates[index]);
+                // 继续传index：允许重复选当前数字；禁止回到index之前，避免排列型重复。
+                process(
+                        candidates,
+                        index,
+                        remaining - candidates[index],
+                        path,
+                        ans
+                );
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         List<List<Integer>> ans = new ArrayList<>();
         List<Integer> tmp = new ArrayList<>();
