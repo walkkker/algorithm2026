@@ -21,6 +21,70 @@ import java.util.*;
 public class Q17_LetterCombinationsOfAPhoneNumber {
 
     /**
+     * 2026-09-12 复盘版本：使用Character到String的映射表示每层候选字母。
+     */
+    class SolutionReviewed20260912 {
+
+        /**
+         * 枚举行为发生在每个数字的字母列表。 -> Character: String
+         *
+         * <p>TODO: 【AI补充-递归定义】进入process(digits, i, path, ans)时，
+         * digits[0, i)对应的字母已经记录在path中；当前方法负责枚举digits[i, n)能够形成的
+         * 所有字母组合，并把完整结果加入ans。方法返回时，path必须恢复到进入方法时的状态。
+         */
+        HashMap<Character, String> map;
+
+        public List<String> letterCombinations(String digits) {
+            char[] chs = digits.toCharArray();
+            map = new HashMap<>();
+            map.put('2', "abc");
+            map.put('3', "def");
+            map.put('4', "ghi");
+            map.put('5', "jkl");
+            map.put('6', "mno");
+            map.put('7', "pqrs");
+            map.put('8', "tuv");
+            map.put('9', "wxyz");
+            List<Character> path = new ArrayList<>();
+            List<String> ans = new ArrayList<>();
+
+            // TODO: 【错误-遗漏】空字符串不能进入回溯。
+            // 如果省略，i==digits.length会立即收集空path，错误返回[""]，而不是[]。
+            if (digits.length() == 0) {
+                return ans;
+            }
+
+            process(chs, 0, path, ans);
+            return ans;
+        }
+
+        private void process(
+                char[] digits,
+                int i,
+                List<Character> path,
+                List<String> ans) {
+
+            if (i == digits.length) {
+                StringBuilder sb = new StringBuilder();
+                for (char c : path) {
+                    sb.append(c);
+                }
+                ans.add(sb.toString());
+                return;
+            }
+
+            // 当前递归层的选择集合，只是当前数字映射出的字母列表。
+            String options = map.get(digits[i]);
+            for (int k = 0; k < options.length(); k++) {
+                path.add(options.charAt(k));
+                process(digits, i + 1, path, ans);
+                // List长度发生变化，兄弟分支会读取，因此必须恢复现场。
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+
+    /**
      你的回溯部分不需要执行“恢复现场”：
      path[index] = option;
      因为每次选择都会覆盖固定下标index，不存在add/remove型容器的残留问题。Arrays.asList('a', 'b', 'c')和增强for中的自动装箱、拆箱也都是合法语法。
