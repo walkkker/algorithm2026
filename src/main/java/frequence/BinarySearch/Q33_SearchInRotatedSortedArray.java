@@ -63,6 +63,12 @@ package frequence.BinarySearch;
  * </pre>
  * 这种写法直接描述当前搜索区间，不依赖原数组的全局末尾位置，更容易迁移到其他旋转数组题。
  *
+ * <p><b>也可以与全局首元素比较：</b>{@code nums[mid] >= nums[0]}判断的是{@code mid}
+ * 位于旋转前的高值段，而不是直接判断“当前左半区有序”。还必须用同样规则判断
+ * {@code target}所属的全局段：二者同段时按普通二分比较大小；二者异段时直接向目标所在段移动。
+ * 所以与{@code nums[left]}比较和与{@code nums[0]}比较都能解题，但判定语义和配套分支不同，
+ * 不能只替换比较对象而保留另一套分支。
+ *
  * <p><b>限制条件：</b>本方法依赖元素互不相同。如果允许重复值，可能出现
  * {@code nums[left] == nums[mid] == nums[right]}，此时无法判断哪一侧有序，需要通过
  * {@code left++、right--}消除无效边界，最坏时间复杂度会退化为{@code O(N)}。
@@ -193,6 +199,49 @@ public class Q33_SearchInRotatedSortedArray {
                     } else {
                         r = mid - 1;
                     }
+                }
+            }
+            return -1;
+        }
+    }
+
+    /**
+     * 全局分段写法：固定与原数组首元素nums[0]比较。
+     *
+     * <p>nums[0]是旋转前高值段的第一个元素。元素互不相同时：
+     * <pre>
+     * nums[x] >= nums[0]：x位于高值段；
+     * nums[x] <  nums[0]：x位于低值段。
+     * </pre>
+     * 该方法先判断mid与target是否同段，再决定二分方向。它不是当前区间有序侧模板。
+     */
+    class GlobalFirstElementSolution {
+        public int search(int[] nums, int target) {
+            int l = 0;
+            int r = nums.length - 1;
+
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (nums[mid] == target) {
+                    return mid;
+                }
+
+                boolean midInHighPart = nums[mid] >= nums[0];
+                boolean targetInHighPart = target >= nums[0];
+
+                if (midInHighPart == targetInHighPart) {
+                    // mid与target位于同一个递增段，可以按普通二分比较数值。
+                    if (nums[mid] < target) {
+                        l = mid + 1;
+                    } else {
+                        r = mid - 1;
+                    }
+                } else if (midInHighPart) {
+                    // mid在左侧高值段，target在右侧低值段。
+                    l = mid + 1;
+                } else {
+                    // mid在右侧低值段，target在左侧高值段。
+                    r = mid - 1;
                 }
             }
             return -1;
