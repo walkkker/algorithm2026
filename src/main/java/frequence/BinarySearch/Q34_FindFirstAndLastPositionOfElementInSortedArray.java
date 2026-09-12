@@ -9,6 +9,60 @@ package frequence.BinarySearch;
  * <p>要求使用时间复杂度为{@code O(log N)}的算法。
  */
 public class Q34_FindFirstAndLastPositionOfElementInSortedArray {
+
+    /**
+     * 2026-09-13 复盘版本：分别寻找小于等于target的最右位置和大于等于target的最左位置。
+     *
+     * <p>两次二分首先寻找边界候选，不要求循环中必须命中target。二分结束后只要确认
+     * {@code mostRight}确实指向target，就能确定target存在；此时{@code mostLeft}和
+     * {@code mostRight}自然分别是第一次和最后一次出现的位置。
+     *
+     * <p>时间复杂度为{@code O(log N)}，额外空间复杂度为{@code O(1)}。
+     */
+    class SolutionReviewed20260913 {
+
+        public int[] searchRange(int[] nums, int target) {
+            // 第一轮：寻找nums[index] <= target的最右位置。
+            // -1表示不存在任何<=target的数组元素，也能覆盖空数组和target小于全部元素的情况。
+            int mostRight = -1;
+            int mostLeft = nums.length;
+            int l = 0;
+            int r = nums.length - 1;
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (nums[mid] <= target) {
+                    mostRight = mid;
+                    l = mid + 1;
+                } else {
+                    r = mid - 1;
+                }
+            }
+
+            // 第二轮：寻找nums[index] >= target的最左位置。
+            // nums.length表示不存在任何>=target的数组元素，是合法的虚拟插入位置。
+            l = 0;
+            r = nums.length - 1;
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (nums[mid] >= target) {
+                    mostLeft = mid;
+                    r = mid - 1;
+                } else {
+                    l = mid + 1;
+                }
+            }
+
+            // TODO: 【关键】第一轮得到的只是“<=target的最右候选”，不一定等于target，
+            // 所以必须做存在性验证。||具有短路特性，mostRight==-1时不会访问nums[-1]。
+            if (mostRight == -1 || nums[mostRight] != target) {
+                return new int[]{-1, -1};
+            } else {
+                // target存在时，第二轮得到的mostLeft必然是target第一次出现的位置。
+                return new int[]{mostLeft, mostRight};
+            }
+        }
+    }
+
     class Solution {
         public int[] searchRange(int[] nums, int target) {
             // TODO: 【错误】限制范围中 nums.length >=0。 所以必须单独考虑，因为 后面代码检验是否存在target的过程存在访问下标。
