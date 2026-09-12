@@ -80,6 +80,53 @@ package frequence.BinarySearch;
  */
 public class Q33_SearchInRotatedSortedArray {
 
+    /**
+     * 2026-09-13 错题复盘：无重复值不代表nums[mid]与nums[left]一定不相等。
+     *
+     * <p>本题没有重复值，可以直接判断左右区间哪一侧有序。但当当前区间只剩一个或两个元素时，
+     * {@code mid}可能与{@code left}是同一个下标，此时两者当然相等。因此判断左侧有序必须使用
+     * {@code nums[mid] >= nums[left]}，不能遗漏等于情况。
+     */
+    class SolutionReviewed20260913 {
+
+        public int search(int[] nums, int target) {
+            int l = 0;
+            int r = nums.length - 1;
+            while (l <= r) {
+                int mid = (l + r) / 2;
+                if (nums[mid] == target) {
+                    return mid;
+                } else {
+                    // TODO: 【错误-分类讨论少考虑了】即便数组没有重复值，也不代表
+                    // nums[mid]不会和nums[l]相同：mid与l可能是同一个下标。
+                    // 错误行：if (nums[mid] > nums[l]) {
+                    //
+                    // TODO: 【错误】反例nums=[3,1], target=1。
+                    // 初始l=0、r=1、mid=0，左区间只有nums[0]一个元素，单元素区间也是有序的。
+                    // 如果使用严格大于，会错误进入“右侧有序”分支并排除真正答案。
+                    if (nums[mid] >= nums[l]) {
+                        // 前面已经排除了target == nums[mid]，因此更精确的模板可写成：
+                        // nums[l] <= target && target < nums[mid]。
+                        // 此处保留原代码的<=，结果仍然正确。
+                        if (target >= nums[l] && target <= nums[mid]) {
+                            r = mid - 1;
+                        } else {
+                            l = mid + 1;
+                        }
+                    } else {
+                        // 同理，更精确的模板可写成nums[mid] < target && target <= nums[r]。
+                        if (target >= nums[mid] && target <= nums[r]) {
+                            l = mid + 1;
+                        } else {
+                            r = mid - 1;
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+    }
+
     class Solution {
         public int search(int[] nums, int target) {
             int l = 0;
