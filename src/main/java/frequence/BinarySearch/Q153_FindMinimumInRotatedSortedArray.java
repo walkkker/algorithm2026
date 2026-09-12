@@ -108,6 +108,49 @@ public class Q153_FindMinimumInRotatedSortedArray {
     }
 
     /**
+     * 与当前左边界比较的完整写法。
+     *
+     * <p><b>与右边界写法产生区别的根因：</b>本题使用下取整中点，因此在
+     * {@code left < right}时恒有：
+     * <pre>
+     * left <= mid < right
+     * </pre>
+     * {@code mid}可能等于{@code left}，却一定不会等于{@code right}。所以：
+     * <ul>
+     *     <li>与右边界比较时，比较的是两个不同下标；元素互不相同保证结果必然是大于或小于；</li>
+     *     <li>与左边界比较时，可能因为{@code mid == left}而相等，无法仅凭相等判断当前区间
+     *     是整体有序的{@code [1,3]}，还是跨越断点的{@code [3,1]}。</li>
+     * </ul>
+     * 因此左边界版本必须先检查当前区间是否整体有序。排除整体有序后，当前区间必然跨越断点，
+     * 此时{@code nums[mid] >= nums[left]}才能确定mid位于左侧高值段。
+     */
+    class LeftBoundarySolution {
+        public int findMin(int[] nums) {
+            int l = 0;
+            int r = nums.length - 1;
+
+            while (l < r) {
+                // Q153元素互不相同。当前区间整体递增时，左端点就是最小值。
+                // 这个前置判断用于消除mid == l时，与左端点比较产生的歧义。
+                if (nums[l] < nums[r]) {
+                    return nums[l];
+                }
+
+                int mid = l + (r - l) / 2;
+                if (nums[mid] >= nums[l]) {
+                    // 已知当前区间跨越断点，mid位于左侧高值段。
+                    // 最小值严格位于mid右侧，可以排除mid。
+                    l = mid + 1;
+                } else {
+                    // mid位于右侧低值段，mid可能就是最小值，必须保留。
+                    r = mid;
+                }
+            }
+            return nums[l];
+        }
+    }
+
+    /**
      旋转数组的走势图如下，可以很好的帮助本题：
        1   -》 高值有序段
       1
