@@ -27,6 +27,85 @@ package frequence.BinarySearch;
  */
 public class Q4_MedianOfTwoSortedArrays {
 
+    /**
+     * 2026-09-14复盘版本：二分的是较短数组贡献给合并后左半区的元素数量，
+     * 而不是寻找某个元素下标。时间复杂度为{@code O(log(min(m,n)))}。
+     *
+     * <p><b>核心思想和步骤：</b>
+     * <ol>
+     *     <li><b>确定数量不变量。</b>中位数来自左右分区：总长度为偶数时左右数量相等；
+     *     总长度为奇数时让左侧多一个。因此
+     *     {@code leftSize = (m + n + 1) / 2}。如果短数组左侧取{@code i}个，
+     *     长数组左侧就必须取{@code j = leftSize - i}个。</li>
+     *     <li><b>确定值域不变量。</b>合法分割必须满足左侧所有元素不大于右侧所有元素。
+     *     两个数组内部本来就有序，所以只需检查两个交叉条件：
+     *     {@code ALeft <= BRight}和{@code BLeft <= ARight}。</li>
+     *     <li><b>使用虚拟边界。</b>当某个分区为空时，以负无穷表示空左区间的最大值，
+     *     以正无穷表示空右区间的最小值。这样比较交叉条件和提取中间值都不需要额外分支。</li>
+     * </ol>
+     *
+     * <p>TODO: 【难点1】{@code i}和{@code j}表示元素个数，因此{@code i}的范围是
+     * {@code [0,m]}，右边界必须是{@code m}而不是{@code m - 1}。
+     *
+     * <p>TODO: 【难点2】四个虚拟边界同时承担两项职责：判断当前切分是否合法，以及在合法后
+     * 直接取得左半区最大值和右半区最小值。哨兵的主要目的不是专门处理偶数情况，而是消除
+     * 空分区的特殊判断；奇数和偶数都会受益。
+     *
+     * <p>TODO: 【核心推导】如果{@code ALeft > BRight}，说明短数组左侧取多了，减小i；
+     * 如果{@code BLeft > ARight}，说明短数组左侧取少了，增大i。两个条件都不成立时，
+     * 数量不变量和值域不变量同时满足，分割线就是中位数分界线。
+     */
+    class SolutionReviewed20260914 {
+        public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+            // 只在短数组上二分：既得到最优复杂度，也保证j始终落在[0,n]。
+            if (nums1.length > nums2.length) {
+                return findMedianSortedArrays(nums2, nums1);
+            }
+
+            int m = nums1.length;
+            int n = nums2.length;
+            int leftSize = (m + n + 1) / 2; // TODO: 【难点1】对应Javadoc中的数量不变量。
+
+            // 这里二分的是左侧元素个数，不是元素下标；0和m都是合法切分位置。
+            int l = 0;
+            int r = m;
+            while (l <= r) {
+                int i = l + (r - l) / 2; // nums1左侧区间的元素个数。
+                int j = leftSize - i;    // nums2左侧区间的元素个数。
+
+                // TODO: 【难点2】虚拟边界同时服务于合法性比较和最终中位数计算。
+                int aLeft = i == 0 ? Integer.MIN_VALUE : nums1[i - 1];
+                int aRight = i == m ? Integer.MAX_VALUE : nums1[i];
+                int bLeft = j == 0 ? Integer.MIN_VALUE : nums2[j - 1];
+                int bRight = j == n ? Integer.MAX_VALUE : nums2[j];
+
+                if (aLeft > bRight) {
+                    // nums1左侧取多了，i必须减小。
+                    r = i - 1;
+                } else if (bLeft > aRight) {
+                    // nums1左侧取少了，i必须增大。
+                    l = i + 1;
+                } else {
+                    // 此时aLeft <= bRight且bLeft <= aRight，找到了合法分割线。
+                    if ((m + n) % 2 == 1) {
+                        // 奇数时左侧多一个，中位数就是左半区最大值。
+                        return Math.max(aLeft, bLeft);
+                    } else {
+                        // 偶数时取左半区最大值与右半区最小值的平均数。
+                        int leftMax = Math.max(aLeft, bLeft);
+                        int rightMin = Math.min(aRight, bRight);
+                        return ((double) leftMax + rightMin) / 2;
+                    }
+                }
+            }
+
+            // TODO: 【不合理兜底】原代码写return 0会把非法输入伪装成合法结果。
+            // 对于满足题目约束的两个有序数组，循环一定能找到合法切分；到达此处说明前提被破坏。
+            // 错误行：return 0;
+            throw new IllegalArgumentException("需要保证入参数组有序");
+        }
+    }
+
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         if (nums1.length > nums2.length) {
             return findMedianSortedArrays(nums2, nums1);
