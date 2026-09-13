@@ -55,6 +55,64 @@ package frequence.BinarySearch;
 public class Q81_SearchInRotatedSortedArrayII {
 
     /**
+     * 2026-09-14复盘版本：三点相等时双端收缩。
+     *
+     * <p><b>结论：</b>当前版本正确，不进行进一步精简也可以直接用于面试。通常情况下每轮能够
+     * 排除一半，时间复杂度接近{@code O(log N)}；大量重复值可能令每轮只能收缩边界，最坏
+     * 时间复杂度为{@code O(N)}。这不是实现不够优化，而是重复值使比较结果无法提供足够信息，
+     * 在该题约束下不存在保证{@code O(log N)}的通用比较算法，因此最坏{@code O(N)}已经是
+     * 渐进意义上的最优界。额外空间复杂度为{@code O(1)}。
+     *
+     * <p>TODO: 【错误-不要走神，基础边界必须稳定】当前使用闭区间{@code [l,r]}进行二分，
+     * 初始化必须是{@code l = 0, r = nums.length - 1}。如果写成{@code r = nums.length}，
+     * {@code r}不是合法数组下标，后续访问{@code nums[r]}可能越界。
+     *
+     * <p>TODO: 【优化点但不是错误】找到mid不是target后，左侧目标值域可以写成
+     * {@code [nums[l], nums[mid])}，右侧可以写成{@code (nums[mid], nums[r]]}。
+     * 当前代码使用包含mid的写法仍然正确，因为{@code target == nums[mid]}已经提前排除；
+     * 改成严格边界只是让区间语义更精确。
+     */
+    class SolutionReviewed20260914 {
+        public boolean search(int[] nums, int target) {
+            int l = 0;
+            // TODO: 【错误-不要走神，还是记得不牢】二分搜索使用闭区间[l,r]：
+            // l = 0，r = nums.length - 1。错误行：int r = nums.length;
+            int r = nums.length - 1;
+
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (nums[mid] == target) {
+                    return true;
+                }
+
+                if (nums[l] == nums[mid] && nums[mid] == nums[r]) {
+                    // case 1：三个位置值相同，无法判断旋转断点在哪一侧。
+                    // mid已确定不是target，所以两端相同值也不是target，可以安全收缩。
+                    l++;
+                    r--;
+                } else if (nums[l] <= nums[mid]) {
+                    // case 2：排除三点相等的歧义后，[l,mid]有序。
+                    // 当前<= nums[mid]仍然正确；更精确可写成target < nums[mid]。
+                    if (target >= nums[l] && target <= nums[mid]) {
+                        r = mid - 1;
+                    } else {
+                        l = mid + 1;
+                    }
+                } else {
+                    // case 3：[mid,r]有序。
+                    // 当前>= nums[mid]仍然正确；更精确可写成target > nums[mid]。
+                    if (target >= nums[mid] && target <= nums[r]) {
+                        l = mid + 1;
+                    } else {
+                        r = mid - 1;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
      * 重点：旋转数组只有一个【断崖】。实现时优先采用Javadoc中的方法一。
      * DONE: 【已独立完成】当前实现已通过非递减数组、重复值及任意旋转位置的穷举对数验证。
      * @param nums
