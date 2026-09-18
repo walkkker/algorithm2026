@@ -13,8 +13,76 @@ import java.util.*;
 public class Q347_TopKFrequentElements {
 
     /**
+     * 2026-09-19复盘：HashMap统计频次 + 分桶法。当前实现正确。
+     *
+     * <p><b>建模思想：</b>桶下标表示频次，桶内列表保存具有该频次的不同数字；
+     * 从高频向低频收集，达到k个立即返回。数字值域可能很大，但频次一定在[1,N]，
+     * 因此可以用频次直接索引桶，无需比较排序；桶内的数字也不需要排序。
+     *
+     * <p><b>复杂度与最优性：</b>设N为输入长度、U为不同数字数。哈希表操作期望O(1)时，
+     * 统计期望O(N)，分桶O(U)，初始化和扫描桶O(N)，桶内合计最多U个元素。
+     * 总时间期望O(N)，达到读取输入的线性时间下界；额外空间O(N)。这是时间渐进最优解之一，
+     * 不代表额外空间一定最少。前提是题目保证1 <= k <= U。
+     *
+     * <p>TODO: 【泛型数组】new List<>[N]是编译错误；new List[N]可编译但会产生
+     * unchecked conversion警告。显式转换配合局部SuppressWarnings仍是未经检查的转换；
+     * 若需完全避免它，可使用List<List<Integer>>。
+     *
+     * <p>TODO: 【退出双层循环】break语法合法，但只退出最内层循环；达到k后必须结束收集，
+     * 此处直接return ans最清晰。否则后续非空桶可能导致ans[k]越界。
+     *
+     * <p>复盘文档：同目录《Hot100堆逐题详解.md》的Q347分桶复盘章节。
+     */
+    class SolutionReviewed20260919 {
+        public int[] topKFrequent(int[] nums, int k) {
+            HashMap<Integer, Integer> map = new HashMap<>();
+            for (int num : nums) {
+                if (!map.containsKey(num)) {
+                    map.put(num, 1);
+                } else {
+                    map.put(num, map.get(num) + 1);
+                }
+            }
+            // 分桶 -> 每个桶对应List<Integer>，桶的含义对应下标，下标即表示频率。
+            // TODO: 【原语法错误记录】List<Integer>[] buckets = new List<>[nums.length + 1]; 右侧不能有<>
+            // 【准确原因】不能直接创建参数化类型的数组；new List<Integer>[N]同样不合法。
+            // 下列原写法正确可用，但会产生unchecked conversion警告，保留以供复盘。
+            // 【可选改写】@SuppressWarnings("unchecked")
+            // List<Integer>[] buckets = (List<Integer>[]) new List<?>[nums.length + 1];
+            // 上述转换仅在始终只存List<Integer>且不经其他可写别名污染数组时保持类型约束。
+            List<Integer>[] buckets = new List[nums.length + 1];
+            // 最大频次是N，必须有buckets[N]，所以长度为N+1；桶按需创建列表。
+            for (int key : map.keySet()) {
+                if (buckets[map.get(key)] == null) {
+                    buckets[map.get(key)] = new ArrayList<>();
+                }
+                buckets[map.get(key)].add(key);
+            }
+
+            int[] ans = new int[k];
+            int index = 0;
+            // i>=0正确；频次0不会出现，也可以写i>=1。
+            for (int i = buckets.length - 1; i >= 0; i--) {
+                if (buckets[i] != null) {
+                    for (int num : buckets[i]) {
+                        ans[index++] = num;
+                        if (index == k) {
+                            // TODO: 【原记录：语法错误-忘记上文】这里是双重循环，break只会到外层循环，
+                            // 最终导致ArrayIndexOutOfBoundsException。错误行：break;
+                            // 【修正分类】这是控制流逻辑错误，不是语法错误：break只退出内层for，
+                            // 后续外层若再找到非空桶，就会写ans[k]越界；return直接结束整个方法。
+                            return ans;
+                        }
+                    }
+                }
+            }
+            return ans;
+        }
+    }
+
+    /**
      * 1. 对应本题是：HashMap + 小根堆（门槛堆）
-     * 2. 最优解是 桶（后面TODO）
+     * 2. 原TODO“最优解是桶”已完成，参见上方SolutionReviewed20260919。
      *
      * 本答案是简化版本的 门槛堆-小根堆。
      *  1. 先把正确版本写出来并讲清复杂度。如果面试官继续追问常数优化，再说：
