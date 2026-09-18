@@ -3,8 +3,13 @@ package frequence.Heap;
 /**
  * 215. 数组中的第K个最大元素
  *
- * TODO: 这道题其实挺难的。 解题算法是quickSelect，是quickSort的变种。基于partition，但是由于每次舍弃一般，所以最终数据量是O(N)。
- * TODO：多多感受，很重要这道题。   T(N) = T(N/2) + O(N)  < 2N
+ * TODO: 【题型识别】无序数组第k大／第k小，想到Quickselect：荷兰国旗分区 + 类二分区间淘汰。
+ * 第k小对应升序下标k-1，第k大对应nums.length-k，重复元素参与排名。
+ * TODO: 【原理解修正】原记忆“每次舍弃一半，T(N)=T(N/2)+O(N)”只是理想平衡情况。
+ * 随机pivot不保证折半；随机Quickselect期望O(N)，最坏O(N^2)。迭代原地版本辅助空间O(1)。
+ *
+ * <p><b>重要复习入口：</b>同目录{@code Quickselect快速选择_第K大与第K小.md}，详细对照
+ * 荷兰国旗、QuickSort、Quickselect以及大小为k的堆。完整排序处理两侧，快速选择只处理目标所在侧。
  *
  * <p>给定整数数组{@code nums}和整数{@code k}，返回数组中第{@code k}个最大的元素。
  *
