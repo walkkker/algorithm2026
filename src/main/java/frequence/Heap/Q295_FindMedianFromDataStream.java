@@ -25,6 +25,60 @@ import java.util.PriorityQueue;
 public class Q295_FindMedianFromDataStream {
 
     /**
+     * 2026-09-19用户复盘版：纯寻找中位数，无删除，使用双堆。
+     *
+     * <p><b>你的原始理解与命名：</b>线性顺序是upper | lower，左侧upper为大根堆，
+     * 弹出左侧最大值；右侧lower为小根堆，弹出右侧最小值。当前代码正确。
+     *
+     * <p>TODO: 【原错误记录】“固定三步骤反了：1.进lower；2.upper.offer(lower.poll());
+     * 3.视size情况是否要lower.add(upper.poll())。”
+     * <p>【限定说明】上述步骤与本版本“左侧upper多一个”的约定不一致；但变量名本身没有
+     * 固定算法含义。下方FixedStepMedianFinder把lower定义为左侧大根堆，所以它先入lower正确。
+     * 应记住职责：先入左侧大根堆，左侧最大值移到右侧，右侧数量多时将右侧最小值移回左侧。
+     *
+     * <p>TODO: 【概念误区】“左侧是大根堆，所以左侧所有元素 >= 右侧所有元素”是错误理解。
+     * 大根堆只保证堆顶是本堆的最大值，不表示整堆的值大于另一堆。
+     * 左侧保存较小的一半，右侧保存较大的一半，因此跨堆关系仍是左侧所有元素 <= 右侧所有元素。
+     * <pre>
+     * 左upper（大根堆）：{1,2,3} | 右lower（小根堆）：{4,5}
+     * 左堆顶3 <= 右堆顶4；中位数为3。
+     * upper.size() == lower.size()
+     * 或upper.size() == lower.size() + 1
+     * </pre>
+     *
+     * <p>插入O(log N)，查询O(1)，空间O(N)。findMedian沿用题目保证：查询前至少插入一个数。
+     * 复盘关联：同目录《Hot100堆逐题详解.md》的Q295命名与跨堆不变量章节。
+     */
+    public static class MedianFinderReviewed20260919 {
+        PriorityQueue<Integer> lower;
+        PriorityQueue<Integer> upper;
+
+        public MedianFinderReviewed20260919() {
+            lower = new PriorityQueue<>();
+            upper = new PriorityQueue<>((a, b) -> Integer.compare(b, a));
+        }
+
+        public void addNum(int num) {
+            // TODO: 一定不要写反：本版本upper为左侧大根堆，lower为右侧小根堆。
+            upper.offer(num);
+            lower.offer(upper.poll());
+            if (lower.size() > upper.size()) { // 右.size > 左.size
+                upper.offer(lower.poll());
+            }
+        }
+
+        public double findMedian() {
+            int size = lower.size() + upper.size();
+            if (size % 2 == 1) {
+                return upper.peek();
+            } else {
+                // 先转double再相加，避免两个int的和溢出。
+                return ((double) upper.peek() + lower.peek()) / 2;
+            }
+        }
+    }
+
+    /**
      * 2026-09-14推荐复盘版本：使用固定三步插入，不需要先判断新元素应该属于哪一侧。
      *
      * <p><b>双堆结构：</b>{@code lower}保存较小的一半，是大根堆；{@code upper}保存较大的
