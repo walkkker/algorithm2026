@@ -17,6 +17,37 @@ package frequence.dp.stock;
  */
 public class Q121_BestTimeToBuyAndSellStock {
 
+    /**
+     * 2026-09-19用户复盘：动态维护前缀最小值。
+     *
+     * <p>枚举卖出日i，固定卖出日后，选择此前价格最低的一天买入一定最优。
+     * 原本每个i都要枚举此前的买入日，维护leftMin可将O(N^2)降为O(N)。
+     *
+     * <p>TODO: 【区间不变量】计算利润时leftMin表示[0,i-1]的最低价格；
+     * 更新leftMin后才表示[0,i]的最低价格。这个执行顺序直接表达先买入、后卖出。
+     * ans维护截至当前卖出日，最多交易一次的最大利润；初始0表示允许不交易。
+     *
+     * <p>分类为“枚举卖出日 + 前缀最小值”，也可从贪心或DP角度解释。
+     * 与下方状态机等价：hold=-leftMin，cash=ans。时间O(N)，额外空间O(1)。
+     * 关联文档：同目录《股票问题总结.md》的Q121章节。
+     */
+    public static class SolutionReviewed20260919 {
+        public int maxProfit(int[] prices) {
+            if (prices.length < 2) {
+                return 0;
+            }
+            int ans = 0;
+            int leftMin = prices[0];
+            for (int i = 1; i < prices.length; i++) {
+                // 动态维护前缀最小值：此时leftMin对应[0,i-1]，枚举今天卖出。
+                ans = Math.max(ans, prices[i] - leftMin);
+                // 更新后leftMin对应[0,i]，供下一轮使用。
+                leftMin = Math.min(leftMin, prices[i]);
+            }
+            return ans;
+        }
+    }
+
     public int maxProfit(int[] prices) {
         if (prices == null || prices.length < 2) {
             return 0;
