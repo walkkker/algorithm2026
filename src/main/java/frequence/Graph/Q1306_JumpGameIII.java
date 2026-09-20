@@ -7,7 +7,8 @@ import java.util.HashMap;
  *
  * <p>扩展题：每个下标是图节点，只能跳到i-arr[i]或i+arr[i]，判断从start能否到达值为0的节点。
  * 落点不连续，不能套用Q55/Q45的最远可达区间模型。
- * 本文件置顶保留用户错误版本，故意不修正其方法体，供错误复盘，不作为正确答案使用。
+ * 本文件置顶保留用户错误版本，故意不修正其方法体，供错误复盘，不作为正确答案使用；
+ * 下方SolutionReviewed20260921是用户修正后的DFS版本。
  */
 public class Q1306_JumpGameIII {
 
@@ -88,6 +89,66 @@ public class Q1306_JumpGameIII {
             boolean p2 = process(arr, i + arr[i]);
             map.put(i, p1 || p2);
             arr[i] = tmp;
+            return p1 || p2;
+        }
+    }
+
+    /**
+     * 用户修正版本（2026-09-21）：访问标记数组boolean[] visited。
+     * 保留先计算p1、再计算p2的原写法，不修改输入数组。
+     */
+    public static class SolutionReviewed20260921 {
+        /**
+         * 从start开始做图DFS，判断能否到达任意值为0的节点。
+         * 每次入口调用创建独立visited，不需要HashMap结果缓存。
+         * 时间O(N)，额外空间O(N)，包含访问数组和最坏O(N)的递归栈。
+         * TODO: 【工程边界】很长的路径可能导致Java递归栈溢出；可改为显式栈DFS或队列BFS。
+         */
+        public boolean canReach(int[] arr, int start) {
+            return dfs(arr, start, new boolean[arr.length]);
+        }
+
+        /**
+         * <p><b>用户理解：</b>重点是避免重复探索，因此返回false不对当前节点结果产生影响。
+         *
+         * <p><b>精确修正：</b>不影响的是“最初start能否到达0”的最终结论，
+         * 不保证每个中间调用都返回“从该节点单独出发”的独立可达性答案。
+         * visited[i]表示已经开始探索，不是该节点的答案为false，也不要求它已经探索结束。
+         * 标记在两个递归调用之前设置，因此再次遇到它时，第一次调用可能还在递归栈中。
+         *
+         * <p><b>返回false的含义：</b>跳过重复分支，不在这条分支重复报告成功；
+         * 不是宣告该节点全局不可达。第一次访问它的调用已承担探索其出边的责任，
+         * 找到的成功结果会沿调用链以逻辑或向上传递。
+         * 图的出边仅由下标和数组决定，与到达历史无关，重复访问不会增加新路径选择。
+         * 所以visited无需恢复为false，不同分支共享访问记录也不会影响起点的最终判断。
+         *
+         * <p><b>反例说明“已访问不等于之前返回false”：</b>arr=[1,1,0]、start=1。
+         * 首次访问1并标记，然后访问0；0的右跳再次遇到1，此时1仍在递归栈中，尚无答案。
+         * 重复分支返回false后，首次访问1的调用继续向右访问2，发现0，最终返回true。
+         * 其中位置0的调用返回false，但单独从0出发其实也能经1到2；不能把中间结果当全局缓存。
+         *
+         * <p><b>步骤：</b>边界及去重检查；检查是否命中0；标记已访问；搜索左右出边；合并结果。
+         *
+         * <p>TODO: 【可优化，不是错误】当前先计算p1和p2，即使p1=true仍会执行p2。
+         * 所以“还在搜索就说明之前没有true”也不成立。
+         * 可以直接写{@code return dfs(arr, i - arr[i], visited) || dfs(arr, i + arr[i], visited);}
+         * 利用短路或在左侧成功后跳过右侧。保留用户原代码方便复盘。
+         */
+        private boolean dfs(int[] arr, int i, boolean[] visited) {
+            // 步骤1：先判越界，再读取visited；已访问时false只是跳过信号，不是不可达缓存。
+            if (i < 0 || i >= arr.length || visited[i]) {
+                return false;
+            }
+            // 步骤2：成功出口，目标是元素值为0，不是下标为0。
+            if (arr[i] == 0) {
+                return true;
+            }
+            // 步骤3：先标记再递归，阻断环；不修改arr，所以跳跃距离不会被覆盖。
+            visited[i] = true;
+            // 步骤4：保留用户分别计算两条分支的实现。
+            boolean p1 = dfs(arr, i - arr[i], visited);
+            boolean p2 = dfs(arr, i + arr[i], visited);
+            // 不撤销visited，重复到达没有新探索价值。
             return p1 || p2;
         }
     }
