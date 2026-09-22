@@ -24,6 +24,70 @@ import java.util.*;
  */
 public class Q15_ThreeSum {
     /**
+     * 第三遍（2026-09-22）：用户报告完成，但一开始仍然做错；修正后版本，不标记为一次独立无错通过。
+     *
+     * <p><b>用户思路：</b>两数之和加强版。定位一个数字，剩余两个位置滑动，至少O(N^2)，
+     * 所以先排序不影响时间复杂度。三重去重：固定元素留前不留后；双指针检查后先移动到相同
+     * 元素边界，再l++、r--切换。快速组建List可用List.of(ele1,ele2,ele3)。
+     *
+     * <p><b>精确化：</b>当前算法最坏时间O(N^2)，排序O(N log N)不改变总体阶数；
+     * “至少O(N^2)”不表示每个输入都要做二次方工作。
+     * 双指针同时去重、同时移动指的是已经命中并收集答案的分支，而不是每次检查后无条件执行。
+     * 固定i的留前不留后保留了更完整的右侧候选区间，仍允许答案包含重复数值。
+     *
+     * <p><b>【本次仍然犯错】漏了不相等时的分类讨论：</b>只写满足三数之和的逻辑，
+     * 如果不命中时两指针都不移动，就会死循环。正确分三类：命中则收集并跳过两侧重复；
+     * 两数和大于目标则r--；小于目标则l++。排序保证过大的当前r无法与更靠右的l配对，
+     * 过小的当前l无法与更靠左的r配对，因此可以安全淘汰对应端点。
+     *
+     * <p><b>其他错误：</b>while必须l&lt;r，因为需要三个不同下标，不能重复使用同一位置；
+     * 收集的是nums[i]、nums[l]、nums[r]，不是i、l、r。
+     * 反例复测：[1,2,3]应终止且无解；[-2,0,1]不能把唯一的1用两次；
+     * [0,0,0,0,1,2,3]只能收集一个[0,0,0]。
+     *
+     * <p>TODO: 【兼容性，不是算法错误】用户原句List.of(nums[i],nums[l],nums[r])需要Java9+。
+     * 项目目标Java8，因此仅替换为Arrays.asList并保留原句，其余算法不变。
+     */
+    public static class SolutionThirdReview20260922 {
+        public List<List<Integer>> threeSum(int[] nums) {
+            Arrays.sort(nums);
+            List<List<Integer>> ans = new ArrayList<>();
+            for (int i = 0; i < nums.length; i++) {
+                // 留前不留后。
+                if (i - 1 >= 0 && nums[i] == nums[i - 1]) {
+                    continue;
+                }
+                int l = i + 1;
+                int r = nums.length - 1;
+                // while (l <= r) { // TODO: 【错误】题目要求l != r。
+                while (l < r) {
+                    if (nums[l] + nums[r] == -nums[i]) {
+                        // ans.add(List.of(i, l, r)); // TODO: 【错误】收集值，不是下标。
+                        // 用户正确原句：ans.add(List.of(nums[i], nums[l], nums[r]));
+                        ans.add(Arrays.asList(nums[i], nums[l], nums[r]));
+                        while (l + 1 <= r && nums[l + 1] == nums[l]) {
+                            l++;
+                        }
+                        while (r - 1 >= l && nums[r - 1] == nums[r]) {
+                            r--;
+                        }
+                        l++;
+                        r--;
+                    } else {
+                        // TODO: 【第三遍复发】不能只写命中分支；未命中也必须推进搜索。
+                        if (nums[l] + nums[r] > -nums[i]) {
+                            r--;
+                        } else {
+                            l++;
+                        }
+                    }
+                }
+            }
+            return ans;
+        }
+    }
+
+    /**
      思路：三数之和 降为 两数之和。
      步骤：
      1. 排序：很重要（1. 去重； 2. L,R知道是需要更大/更小，从而移动L,R）
