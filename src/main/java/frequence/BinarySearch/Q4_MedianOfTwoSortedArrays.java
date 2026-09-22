@@ -15,17 +15,73 @@ package frequence.BinarySearch;
  * </pre>
  * 找到合法分割后，中位数只与两条分割线左右相邻的四个元素有关。
  *
- * <p>TODO: 【当前实现的建模方式】当前版本二分的是“shortest左半部分最后一个元素的下标mid”，
+ * <p>TODO: 【历史实现的建模方式】旧版本二分的是“shortest左半部分最后一个元素的下标mid”，
  * {@code ans == -1}表示shortest左侧一个元素也没有。该模型可以实现，但边界分支较多。
  * 更稳定的标准模板是二分“shortest左侧选择了几个元素i”，使{@code i}的范围天然为
  * {@code [0, shortest.length]}，再通过正负无穷哨兵统一处理数组两端。
  *
- * <p>TODO: 【当前版本确定存在的边界错误】题目允许其中一个数组为空。当shortest为空且总长度
+ * <p>TODO: 【历史版本的边界错误，并非下方第三遍版本】题目允许其中一个数组为空。当shortest为空且总长度
  * 为偶数时，循环不会执行，随后偶数分支会访问{@code shortest[0]}并抛出数组越界异常。
  * 反例：{@code nums1=[]，nums2=[1,2]}。标准实现和完整推演参见同目录
  * {@code 两个正序数组中位数.md}。
  */
 public class Q4_MedianOfTwoSortedArrays {
+
+    /**
+     * 第三遍复习（2026-09-22）：用户报告已完成，保留提交的实现。
+     *
+     * <p><b>用户理解：</b>1. 定位：nums1短、nums2长。left表示nums1左侧长度，
+     * 通过公式换算nums2左侧长度。奇数时left多包含一个，偶数时left和right一样多。
+     * 2. 追求满足的条件：nums1左 &lt; nums2右，nums2左 &lt; nums1右。
+     * 【难点】虚拟边界，因为左/右不始终对应实际下标。
+     *
+     * <p><b>注释精确化，代码无需修改：</b>奇偶平衡指的是两个数组合起来的左半区与右半区，
+     * 不是nums1自身的左右两部分；count是合并后的左半区总数，mid1是nums1贡献的个数。
+     * 左/右边界比较的是分割线两侧的最大/最小元素，而不是整个数组或分区长度。
+     * 允许重复值，因此合法条件是ALeft &lt;= BRight且BLeft &lt;= ARight，不能要求严格小于。
+     * 当前代码仅在严格违反条件时移动边界，所以代码已正确处理相等情况。
+     *
+     * <p>l/r搜索范围[0,nums1.length]包含空左分区与整个短数组；mid2=count-mid1。
+     * 在短数组上搜索保证mid2落在长数组合法切分范围内。
+     * 空左分区使用MIN_VALUE，空右分区使用MAX_VALUE，统一大小比较而不访问越界下标。
+     * 偶数答案在相加前转double，避免两个int相加溢出。
+     *
+     * <p>TODO: 【可选健壮性，不是本题错误】合法有序且总长度非0的输入必然找到切分，
+     * 末尾return -1不会执行；通用API可抛异常，但-1本身可能是合法中位数，不能作通用失败标志。
+     * 时间O(log(min(m,n)+1))，额外空间O(1)，交换参数最多递归一次。
+     */
+    public static class SolutionThirdReview20260922 {
+        public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+            if (nums2.length < nums1.length) {
+                return findMedianSortedArrays(nums2, nums1);
+            }
+            int count = (nums1.length + nums2.length + 1) / 2;
+            int l = 0;
+            int r = nums1.length; // l/r不是元素下标，而是nums1左侧区域的个数。
+            while (l <= r) {
+                int mid1 = (l + r) / 2;
+                int mid2 = count - mid1;
+
+                int ALeft = mid1 == 0 ? Integer.MIN_VALUE : nums1[mid1 - 1];
+                int ARight = mid1 == nums1.length ? Integer.MAX_VALUE : nums1[mid1];
+                int BLeft = mid2 == 0 ? Integer.MIN_VALUE : nums2[mid2 - 1];
+                int BRight = mid2 == nums2.length ? Integer.MAX_VALUE : nums2[mid2];
+
+                if (ALeft > BRight) {
+                    r = mid1 - 1; // A左侧取多了。
+                } else if (ARight < BLeft) {
+                    l = mid1 + 1; // A左侧取少了。
+                } else {
+                    if ((nums1.length + nums2.length) % 2 == 1) {
+                        return (double) Math.max(ALeft, BLeft);
+                    } else {
+                        return ((double) Math.max(ALeft, BLeft) + Math.min(ARight, BRight)) / 2;
+                    }
+                }
+            }
+            return -1;
+        }
+    }
 
     /**
      * 2026-09-14复盘版本：二分的是较短数组贡献给合并后左半区的元素数量，
