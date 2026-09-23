@@ -18,6 +18,78 @@ package frequence.LinkedList;
 public class Q25_ReverseNodesInKGroup {
 
     /**
+     * 2026-09-23 第三遍，修正计数条件中的后置自减错误。
+     *
+     * <p><b>我的理解：</b>处理链表问题最直观的办法：不要省代码，用变量锁住地址，
+     * 而不要依赖会改动的指针字段；提前保存pre、start、end、post。
+     * 上一次错误点：如果节点总数不是k的整数倍，最后剩余节点必须保持原有顺序。
+     *
+     * <p><b>补充定义：</b>Java变量保存节点引用，而不是固定物理地址；修改next不会改变
+     * 已保存引用所指的节点。每轮cur是待反转组的前驱，先确认完整k个，再冻结边界并反转。
+     * 反转后end是本组头，start是本组尾，也是下一组的前驱。
+     *
+     * <p>本版在k为正整数的题目约束下正确。时间O(N)，额外空间O(1)，无递归栈。
+     * 计数错误详见同目录《链表错题本.md》的2026-09-23记录。
+     */
+    public static class SolutionThirdReview20260923 {
+        public ListNode reverseKGroup(ListNode head, int k) {
+            ListNode dummy = new ListNode(0);
+            dummy.next = head;
+            ListNode cur = dummy;
+            while (cur != null) { // TODO: 我的每一个开始点，都是[start,end]的前一个节点。
+                ListNode pre = cur;
+                ListNode start = cur.next;
+                ListNode end = countKNodes(start, k);
+                if (end == null) {
+                    return dummy.next;
+                }
+                ListNode post = end.next;
+                reverse(start, end);
+                pre.next = end;
+                start.next = post;
+                // 我的原注释：跳转到下一段的终点。这个终点实际上是之前的start。
+                // TODO: 【表述修正】是本组反转后的尾节点，即下一组的前驱，不是下一组终点。
+                cur = start;
+            }
+            return dummy.next;
+        }
+
+        /**
+         * 从start开始数k个节点：足够则返回第k个节点，不足则返回null。
+         * start已算第1个，所以只需移动k-1次；即使计数归零时cur为null，也仍应返回null。
+         */
+        private ListNode countKNodes(ListNode start, int k) {
+            ListNode cur = start;
+            k--;
+            // TODO: 【错误-超级错误】一开始写的是while(k-- > 0 && cur != null)。
+            // 节点充裕时，最后一次条件判断用0比较后仍会自减，退出时k=-1，而不是0。
+            // 因此原来的return k == 0 ? cur : null会把完整分组误判为不足k个。
+            // 我的原理解：我们预期k=3成功执行三次后，k==0。
+            // TODO: 【计数修正】本方法先k--，原始k=3只需移动两次；第三次条件检查不应修改k。
+            // 【解决方案】以后不要再inline了，分开写：条件只判断，循环体末尾再k--。
+            // 补充：不是所有内联自减都有错，而是退出后还依赖计数值时，要明确最后一次求值的副作用。
+            while (k > 0 && cur != null) {
+                cur = cur.next;
+                k--;
+            }
+            return k == 0 ? cur : null;
+        }
+
+        private void reverse(ListNode head, ListNode end) {
+            ListNode cur = head;
+            // TODO: 【旧错复盘】end.next会被改写，必须提前保存终止节点。
+            ListNode des = end.next;
+            ListNode pre = null;
+            while (cur != des) {
+                ListNode next = cur.next;
+                cur.next = pre;
+                pre = cur;
+                cur = next;
+            }
+        }
+    }
+
+    /**
      * 2026-08-31 我的四节点变量分组反转实现。
      *
      * <p><b>核心思路：</b>{@code dummy + pre、start、end、endNext}。先把本轮会受到
