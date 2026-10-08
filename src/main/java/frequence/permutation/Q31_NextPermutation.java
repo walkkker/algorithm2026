@@ -36,6 +36,57 @@ package frequence.permutation;
 public class Q31_NextPermutation {
 
     /**
+     * 2026-10-08 第三遍实现：最右顺序对 + 后继交换 + 后缀反转。
+     *
+     * <p>按用户本次提交的循环结构保留实现。最右的顺序对{@code nums[i] < nums[i + 1]}
+     * 左侧是需要尽可能靠右增大的位置；其右侧是非递增后缀。从后缀右端找到第一个
+     * 大于{@code nums[i]}的值并交换，再反转后缀，即可得到字典序紧接着的排列。
+     * 如果不存在顺序对，整个数组是最大排列，反转成最小排列。
+     *
+     * <p>时间{@code O(N)}，额外空间{@code O(1)}。题目保证数组非空。
+     */
+    public static class SolutionThirdReview20261008 {
+        /**
+            1. 从右往左找第一个 顺序对
+            2. 从右往左找第一个大于 顺序对小数 的数字， swap
+            3. reverse后部分
+         */
+        public void nextPermutation(int[] nums) {
+            int len = nums.length;
+            for (int i = len - 2; i >= 0; i--) {
+                if (nums[i] < nums[i + 1]) {
+                    for (int j = len - 1; j >= 0; j--) {
+                        if (nums[j] > nums[i]) {
+                            swap(nums, i, j);
+                            int l = i + 1;
+                            int r = len - 1;
+                            while (l <= r) {
+                                swap(nums, l, r);
+                                l++;
+                                r--;
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+            int l = 0;
+            int r = len - 1;
+            while (l <= r) {
+                swap(nums, l, r);
+                l++;
+                r--;
+            }
+        }
+
+        private void swap(int[] nums, int i, int j) {
+            int tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+    }
+
+    /**
      寻找最右升序（必须是右侧第一个升序的，别的方法都不行） + 交换 (跟右侧刚刚大于一点的那个数交换) + 后缀反转完成升序（此时，右侧依然全部是降序，反转即升序）
 
      可以画一张图，去理解上述逻辑。 第一个升序，右侧都是降序。 => 此时你就知道，为什么 必须按上述步骤做，才能得到下一个排列。
