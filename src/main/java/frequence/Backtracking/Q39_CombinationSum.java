@@ -36,6 +36,122 @@ import java.util.*;
 public class Q39_CombinationSum {
 
     /**
+     * 2026-10-08 第三遍错误版：把两种递归枚举模型叠加，造成重复组合。
+     *
+     * <p><b>本次错误特别重要：</b>同一个问题的选择不能被不同分支重复表示。
+     * 这里既用{@code process(i + 1, ...)}表示“不选当前位置”，又在同一层用
+     * {@code for (k = i; ...)}表示“从当前位置及后续位置选一个”。两种组织方式覆盖范围
+     * 重叠：同一个后缀组合既能先跳过当前候选、再由后缀循环生成，也能由当前循环直接
+     * 选择后缀候选生成，因此会从不同递归路径重复出现。
+     *
+     * <p>反例：{@code candidates = [2,3], target = 6}。组合{@code [3,3]}既能从根节点
+     * 的“不选2”分支进入3的循环生成，也能从根节点循环直接选择3后继续生成。
+     *
+     * <p>这次与旧错误“每层重新扫描整个数组，导致[2,3]和[3,2]重复”不同：旧错误是选择
+     * 顺序没有约束；本次代码已经尝试约束顺序，但把两套选择组织方式混在同一个节点。
+     *
+     * <p><b>修复原则：</b>每个递归层只采用一套清晰的枚举模型。使用“选/不选当前候选”时，
+     * 每层只决策当前下标；使用循环枚举下一个候选时，就用{@code start}限制可选后缀，
+     * 不再同时递归一个“不选当前”的分支。
+     */
+    public static class SolutionThirdReview20261008Wrong {
+        /**
+            回溯都带枚举。
+
+            本题关键：递归枚举时，为避免答案重复（准确说避免 先选1再选3 和 先选3再选1 的重复答案出现），需要 在枚举基础上 添加 限制（该限制通过变量实现）。
+            => 从而保证 ans 的下标顺序一定是 不递减的（aka. 相等或增加）。
+         */
+        public List<List<Integer>> combinationSum(int[] candidates, int target) {
+            List<Integer> path = new ArrayList<>();
+            List<List<Integer>> ans = new ArrayList<>();
+            process(candidates, 0, target, path, ans);
+            return ans;
+        }
+
+        private void process(
+                int[] arr, int i, int remain,
+                List<Integer> path, List<List<Integer>> ans) {
+            if (i == arr.length) {
+                // TODO: 【错误-只要是base case，一定要return！不然会执行正常递归，最终stackOverFlow！】
+                // 不管remain是否为0，最终都要return。只不过remain==0时满足条件，会记录ans。
+                // if (remain == 0) {
+                //     ans.add(new ArrayList<>(path));
+                // } else {
+                //     return;
+                // }
+                if (remain == 0) {
+                    ans.add(new ArrayList<>(path));
+                }
+                return;
+            }
+
+            // TODO: 【本次致命错误】把“不选/选择当前候选”与“循环枚举当前及后续候选”叠加。
+            // 同一组合会从不同递归路径生成，详见类Javadoc和回溯专题Markdown。
+
+            // option1：不选cur。但是注意，i要递进，仅代表当前位置不选择。
+            process(arr, i + 1, remain, path, ans);
+
+            // option2：选择。这里又枚举当前位置及后续位置，与option1分支发生重叠。
+            for (int k = i; k < arr.length; k++) {
+                if (remain - arr[k] >= 0) {
+                    path.add(arr[k]);
+                    process(arr, k, remain - arr[k], path, ans);
+                    path.remove(path.size() - 1);
+                }
+            }
+        }
+    }
+
+    /**
+     * 2026-10-08 第三遍修正版：每一层只枚举“当前候选不选”或“当前候选选一次”。
+     *
+     * <p>选择当前候选后仍传{@code i}，因此该候选可以重复使用；不选择时传{@code i + 1}，
+     * 后续递归不再回到该候选。每个组合按候选下标不下降的唯一规范顺序构造。
+     *
+     * <p>叶子条件是{@code i == candidates.length}：无论remain是否为0都必须return；只有
+     * remain为0时收集路径快照。候选数为正数，因此remain到0后，“选择”分支会被条件挡住，
+     * “不选”分支最终抵达叶子并收集答案。
+     *
+     * <p>本版沿用用户的枚举写法；较早的{@code start + remaining}循环版仍保留在下方。
+     */
+    public static class SolutionThirdReview20261008 {
+        /**
+            回溯都带枚举。
+
+            本题关键：递归枚举时，为避免答案重复（准确说避免 先选1再选3 和 先选3再选1 的重复答案出现），需要 在枚举基础上 添加 限制（该限制通过变量实现）。
+            => 从而保证 ans 的下标顺序一定是 不递减的（aka. 相等或增加）。
+         */
+        public List<List<Integer>> combinationSum(int[] candidates, int target) {
+            List<Integer> path = new ArrayList<>();
+            List<List<Integer>> ans = new ArrayList<>();
+            process(candidates, 0, target, path, ans);
+            return ans;
+        }
+
+        private void process(
+                int[] arr, int i, int remain,
+                List<Integer> path, List<List<Integer>> ans) {
+            if (i == arr.length) {
+                // 到达叶子后，不论是否命中目标都结束当前分支。
+                if (remain == 0) {
+                    ans.add(new ArrayList<>(path));
+                }
+                return;
+            }
+
+            // 不选当前候选，只能进入下一个下标。
+            process(arr, i + 1, remain, path, ans);
+
+            // 选当前候选一次；仍留在i，允许同一个数继续重复使用。
+            if (remain - arr[i] >= 0) {
+                path.add(arr[i]);
+                process(arr, i, remain - arr[i], path, ans);
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+
+    /**
      * 2026-09-12 复盘版本一：每层确定一种候选数使用多少次。
      *
      * <p><b>我的第一轮思路与错误：</b>
